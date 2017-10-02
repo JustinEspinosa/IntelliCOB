@@ -43,7 +43,8 @@ program_id_
 end_program_ ::= END PROGRAM DOT COBOLWORD DOT
 
 //################
-program_id_     ::= PROGRAM_ID DOT COBOLWORD DOT
+program_id_     ::= PROGRAM_ID DOT program_id_name_ DOT
+program_id_name_::= COBOLWORD
 author_         ::= AUTHOR DOT [COMMENT_ENTRY]
 installation_   ::= INSTALLATION DOT [COMMENT_ENTRY]
 date_written_   ::= DATE-WRITTEN DOT [COMMENT_ENTRY]
@@ -74,10 +75,10 @@ object_computer_ ::= OBJECT_COMPUTER DOT COMPUTER_NAME
  [segment_limit_]
  [character_set_]
  DOT
-memory_size_                ::= MEMORY [SIZE] INTEGER_ (WORDS|MODULES|CHARACTERS)
-program_collating_sequence_ ::= [PROGRAM] [COLLATING] SEQUENCE [IS] COBOLWORD
-segment_limit_              ::= SEGMENT_LIMIT [IS] INTEGER_
-character_set_              ::= CHARACTER_SET [IS] (DANSK-NORSK|DEUTSCH|ESPANOL|FRANCAIS-AZ|FRANCAIS-QW|SVENSK-SUOMI|UK|USASCII)
+private memory_size_                ::= MEMORY [SIZE] INTEGER_ (WORDS|MODULES|CHARACTERS)
+private program_collating_sequence_ ::= [PROGRAM] [COLLATING] SEQUENCE [IS] COBOLWORD
+private segment_limit_              ::= SEGMENT_LIMIT [IS] INTEGER_
+private character_set_              ::= CHARACTER_SET [IS] (DANSK-NORSK|DEUTSCH|ESPANOL|FRANCAIS-AZ|FRANCAIS-QW|SVENSK-SUOMI|UK|USASCII)
 
 //################
 special_names_ ::= SPECIAL_NAMES DOT
@@ -89,16 +90,16 @@ special_names_ ::= SPECIAL_NAMES DOT
 [currency_sign_]
 [decimal_point_]
 DOT
-system_name_ ::= COBOLWORD [status_phrase_] IS COBOLWORD [status_phrase_]
-status_phrase_ ::= (ON [STATUS] [IS] COBOLWORD [OFF [STATUS] [IS] COBOLWORD]|OFF [STATUS] [IS] COBOLWORD [ON [STATUS] [IS] COBOLWORD])
-file_mnemonic_::= (COBOLWORD|FILE file_name_ IS COBOLWORD)
-alphabet_ ::= ALPHABET COBOLWORD [IS] [STANDARD-1][STANDARD-2][NATIVE][EBCDIC][literal_phrase_]
-symbolic_characters_ ::= SYMBOLIC [CHARACTERS] character_list_+
-character_list_ ::= COBOLWORD (IS|ARE) INTEGER_ IN COBOLWORD
-class_ ::= CLAZZ COBOLWORD IS literal_phrase_+
-currency_sign_ ::= CURRENCY [SIGN] [IS] STRING
-decimal_point_ ::= DECIMAL_POINT [IS] COMMA
-literal_phrase_ ::= literal_ (THROUGH|THRU|ALSO) literal_
+private system_name_ ::= COBOLWORD [status_phrase_] IS COBOLWORD [status_phrase_]
+private status_phrase_ ::= (ON [STATUS] [IS] COBOLWORD [OFF [STATUS] [IS] COBOLWORD]|OFF [STATUS] [IS] COBOLWORD [ON [STATUS] [IS] COBOLWORD])
+private file_mnemonic_::= (COBOLWORD|FILE file_name_ IS COBOLWORD)
+private alphabet_ ::= ALPHABET COBOLWORD [IS] [STANDARD-1][STANDARD-2][NATIVE][EBCDIC][literal_phrase_]
+private symbolic_characters_ ::= SYMBOLIC [CHARACTERS] character_list_+
+private character_list_ ::= COBOLWORD (IS|ARE) INTEGER_ IN COBOLWORD
+private class_ ::= CLAZZ COBOLWORD IS literal_phrase_+
+private currency_sign_ ::= CURRENCY [SIGN] [IS] STRING
+private decimal_point_ ::= DECIMAL_POINT [IS] COMMA
+private literal_phrase_ ::= literal_ (THROUGH|THRU|ALSO) literal_
 
 //*******************************
 // -> input-output section
@@ -119,16 +120,16 @@ file_control_clause_ ::= select_ assign_
  [record_key_]
  [file_status_]
  DOT
-select_ ::= SELECT [OPTIONAL] COBOLWORD
-assign_ ::= ASSIGN [TO] file_name_
-reserve_ ::= RESERVE INTEGER_ (AREA|AREAS)
-organization_ ::= [ORGANIZATION] [IS] ([LINE] SEQUENTIAL|RELATIVE|INDEXED)
-padding_character_ ::= PADDING [CHARACTER] [IS] identifier_or_literal_
-record_delimiter_ ::= RECORD DELIMITER [IS] (STANDARD-1|identifier_or_literal_)
-access_mode_ ::= ACCESS [MODE] [IS] (SEQUENTIAL|RANDOM|DYNAMIC) [RELATIVE [KEY] [IS] identifier_]
-alternate_record_key_ ::= ALTERNATE RECORD [KEY] [IS] identifier_ [[WITH] DUPLICATES]
-record_key_ ::= RECORD [KEY] [IS] identifier_
-file_status_ ::=  [FILE] STATUS [IS] identifier_
+private select_ ::= SELECT [OPTIONAL] COBOLWORD
+private assign_ ::= ASSIGN [TO] file_name_
+private reserve_ ::= RESERVE INTEGER_ (AREA|AREAS)
+private organization_ ::= [ORGANIZATION] [IS] ([LINE] SEQUENTIAL|RELATIVE|INDEXED)
+private padding_character_ ::= PADDING [CHARACTER] [IS] identifier_or_literal_
+private record_delimiter_ ::= RECORD DELIMITER [IS] (STANDARD-1|identifier_or_literal_)
+private access_mode_ ::= ACCESS [MODE] [IS] (SEQUENTIAL|RANDOM|DYNAMIC) [RELATIVE [KEY] [IS] identifier_]
+private alternate_record_key_ ::= ALTERNATE RECORD [KEY] [IS] identifier_ [[WITH] DUPLICATES]
+private record_key_ ::= RECORD [KEY] [IS] identifier_
+private file_status_ ::=  [FILE] STATUS [IS] identifier_
 
 //################
 io_control_ ::= I-O-CONTROL DOT
@@ -136,10 +137,10 @@ io_control_ ::= I-O-CONTROL DOT
  [same_area_+]
  [multiple_file_+]
  DOT]
-rerun_ ::= RERUN [ON file_name_ ] EVERY (rerun2_|identifier_or_literal_ [CLOCK-UNITS])
-rerun2_ ::= (identifier_or_literal_ RECORDS|[END] [OF] (REEL|UNIT) OR file_name_)
-same_area_ ::= SAME [(RECORD|SORT|MERGE)] [AREA] [FOR] file_name_+
-multiple_file_ ::= MULTIPLE FILE [TAPE] [CONTAINS] (COBOLWORD [POSITION identifier_or_literal_])+
+private rerun_ ::= RERUN [ON file_name_ ] EVERY (rerun2_|identifier_or_literal_ [CLOCK-UNITS])
+private rerun2_ ::= (identifier_or_literal_ RECORDS|[END] [OF] (REEL|UNIT) OR file_name_)
+private same_area_ ::= SAME [(RECORD|SORT|MERGE)] [AREA] [FOR] file_name_+
+private multiple_file_ ::= MULTIPLE FILE [TAPE] [CONTAINS] (COBOLWORD [POSITION identifier_or_literal_])+
 
 //################
 receive_control_ ::= RECEIVE-CONTROL DOT
@@ -151,13 +152,13 @@ receive_control_ ::= RECEIVE-CONTROL DOT
 [message_source_]
 [report_]
 DOT
-external_ ::= W_EXTERNAL
-table_occurs_ ::= TABLE OCCURS INTEGER_ [EXTENDED-STORAGE] [TIMES]
-syncdepth_limit_ ::= SYNCDEPTH [LIMIT] [IS] INTEGER_
-reply_contains_ ::= REPLY [CONTAINS] (INTEGER_ [CHARACTERS]|file_name_ [RECORD])
-error_code_ ::= ERROR [CODE] [IS] identifier_
-message_source_ ::= [MESSAGE] SOURCE [IS] identifier_
-report_ ::= REPORT (COBOLWORD [MESSAGES])+
+private external_ ::= W_EXTERNAL
+private table_occurs_ ::= TABLE OCCURS INTEGER_ [EXTENDED-STORAGE] [TIMES]
+private syncdepth_limit_ ::= SYNCDEPTH [LIMIT] [IS] INTEGER_
+private reply_contains_ ::= REPLY [CONTAINS] (INTEGER_ [CHARACTERS]|file_name_ [RECORD])
+private error_code_ ::= ERROR [CODE] [IS] identifier_
+private message_source_ ::= [MESSAGE] SOURCE [IS] identifier_
+private report_ ::= REPORT (COBOLWORD [MESSAGES])+
 
 //*******************************
 //DATA DIVISION
@@ -166,14 +167,14 @@ data_division_ ::= DATA DIVISION DOT
 [file_section_]
 [working_storage_section_]
 [extended_storage_section_]
-[linkage_sections_]
+[linkage_section_]
 
 //*******************************
 //Sections
 file_section_ ::= FILE SECTION DOT (data_item_|file_description_)*
-working_storage_section_ ::= WORKING-STORAGE SECTION DOT data_item_*
-extended_storage_section_ ::= EXTENDED-STORAGE SECTION DOT data_item_*
-linkage_sections_ ::=  LINKAGE SECTION DOT data_item_*
+working_storage_section_ ::= WORKING-STORAGE SECTION DOT (data_item_|DOT)*
+extended_storage_section_ ::= EXTENDED-STORAGE SECTION DOT (data_item_|DOT)*
+linkage_section_ ::=  LINKAGE SECTION DOT (data_item_|DOT)*
 
 //################
 file_description_ ::= (FD|SD) COBOLWORD
@@ -188,21 +189,22 @@ file_description_ ::= (FD|SD) COBOLWORD
 |code_set_
 |report2_)+
 DOT
-external2_ ::= [IS] W_EXTERNAL
-global_ ::= [IS] GLOBAL
-block_contains_ ::= BLOCK [CONTAINS] INTEGER_ [TO INTEGER_] (RECORDS|CHARACTERS)
-record_contains_ ::= RECORD (contains_fix_|contains_varying_)
-contains_fix_ ::= [CONTAINS] INTEGER_ [TO INTEGER_] [CHARACTERS]
-contains_varying_ ::= [IS] VARYING [IN] [SIZE] ([FROM] INTEGER_ [TO INTEGER_] [CHARACTERS]|DEPENDING [ON] identifier_)
-label_records_ ::= LABEL (RECORD [IS]|RECORDS [ARE]) (STANDARD|OMITTED)
-value_of_ ::= VALUE OF (COBOLWORD [OF] identifier_or_literal_)+
-data_records_ ::= DATA RECORDS (RECORD [IS]|RECORDS [ARE]) COBOLWORD+
-linage_ ::= LINAGE [IS] identifier_or_literal_ [LINES] [[WITH] FOOTING [AT] identifier_or_literal_] [[LINES] [AT] (TOP|BOTTOM) identifier_or_literal_]
-code_set_ ::= CODE-SET [IS] COBOLWORD
-report2_ ::= (REPORT [IS]|REPORTS [ARE]) COBOLWORD
+private external2_ ::= [IS] W_EXTERNAL
+private global_ ::= [IS] GLOBAL
+private block_contains_ ::= BLOCK [CONTAINS] INTEGER_ [TO INTEGER_] (RECORDS|CHARACTERS)
+private record_contains_ ::= RECORD (contains_fix_|contains_varying_)
+private contains_fix_ ::= [CONTAINS] INTEGER_ [TO INTEGER_] [CHARACTERS]
+private contains_varying_ ::= [IS] VARYING [IN] [SIZE] ([FROM] INTEGER_ [TO INTEGER_] [CHARACTERS]|DEPENDING [ON] identifier_)
+private label_records_ ::= LABEL (RECORD [IS]|RECORDS [ARE]) (STANDARD|OMITTED)
+private value_of_ ::= VALUE OF (COBOLWORD [OF] identifier_or_literal_)+
+private data_records_ ::= DATA RECORDS (RECORD [IS]|RECORDS [ARE]) COBOLWORD+
+private linage_ ::= LINAGE [IS] identifier_or_literal_ [LINES] [[WITH] FOOTING [AT] identifier_or_literal_] [[LINES] [AT] (TOP|BOTTOM) identifier_or_literal_]
+private code_set_ ::= CODE-SET [IS] COBOLWORD
+private report2_ ::= (REPORT [IS]|REPORTS [ARE]) COBOLWORD
 
 //################
-data_item_ ::= INTEGER_ (COBOLWORD|FILLER) [data_type_description_] DOT
+data_item_ ::= INTEGER_ data_item_name_ [data_type_description_] DOT
+data_item_name_ ::= (COBOLWORD|FILLER)
 data_type_description_ ::= (redefines_
  |external2_
  |global_
@@ -214,27 +216,28 @@ data_type_description_ ::= (redefines_
  |justified_
  |blank_when_zero_
  |value_)*
-redefines_ ::= REDEFINES COBOLWORD
-picture_ ::= (PICTURE|PIC) [IS] PICTURE_STRING
-usage_ ::= [USAGE] [IS] (BINARY|COMPUTATIONAL|COMP|COMPUTATIONAL-3|COMP-3|COMPUTATIONAL-5|COMP-5|DISPLAY|INDEX|NATIVE-2|NATIVE-4|NATIVE-8|PACKED-DECIMAL|POINTER)
-sign_ ::= [SIGN][IS] (LEADING|TRAILING) [SEPARATE [CHARACTER]]
-occurs_ ::= OCCURS INTEGER_ [TO INTEGER_] [TIMES] [DEPENDING [ON] identifier_] key_order_* [INDEXED [BY] COBOLWORD+]
-key_order_ ::= (ASCENDING|DESCENDING) [KEY] [IS] COBOLWORD+
-synchronized_ ::= (SYNCHRONIZED|SYNC) [(LEFT|RIGHT)]
-justified_ ::= (JUSTIFIED|JUST) [RIGHT]
-blank_when_zero_ ::= BLANK [WHEN] ZERO
-value_  ::= VALUE [IS] (literal_phrase_|literal_)+
+private redefines_ ::= REDEFINES COBOLWORD
+private picture_ ::= (PICTURE|PIC) [IS] PICTURE_STRING
+private usage_ ::= [USAGE] [IS] (BINARY|COMPUTATIONAL|COMP|COMPUTATIONAL-3|COMP-3|COMPUTATIONAL-5|COMP-5|DISPLAY|INDEX|NATIVE-2|NATIVE-4|NATIVE-8|PACKED-DECIMAL|POINTER)
+private sign_ ::= [SIGN][IS] (LEADING|TRAILING) [SEPARATE [CHARACTER]]
+private occurs_ ::= OCCURS INTEGER_ [TO INTEGER_] [TIMES] [DEPENDING [ON] identifier_] key_order_* [INDEXED [BY] COBOLWORD+]
+private key_order_ ::= (ASCENDING|DESCENDING) [KEY] [IS] COBOLWORD+
+private synchronized_ ::= (SYNCHRONIZED|SYNC) [(LEFT|RIGHT)]
+private justified_ ::= (JUSTIFIED|JUST) [RIGHT]
+private blank_when_zero_ ::= BLANK [WHEN] ZERO
+private value_  ::= (VALUE [IS]|VALUES [ARE]) (literal_phrase_|literal_)+
 
 //*******************************
 //PROCEDURE DIVISION
 //*******************************
-procedure_division_ ::= PROCEDURE DIVISION [using_] DOT [declaratives_] sentence_*
+procedure_division_ ::= PROCEDURE DIVISION [using_] DOT [declaratives_] (paragraph_|section_)+
+declaratives_ ::= DECLARATIVES DOT (declaratives_section_)+ END DECLARATIVES DOT
 
-declaratives_ ::= DECLARATIVES DOT sentence_* END DECLARATIVES DOT
+declaratives_section_ ::= paragraph_name_ SECTION [INTEGER_] DOT use_ (paragraph_|sentence_)*
 
-sentence_ ::= (instruction_* DOT|paragraph_header_)
-
-paragraph_header_ ::= paragraph_name_ [SECTION [INTEGER_]] DOT
+section_ ::= paragraph_name_ SECTION [INTEGER_] DOT (paragraph_|sentence_)*
+paragraph_ ::= paragraph_name_ DOT sentence_*
+sentence_ ::= (instruction_* DOT)
 
 instruction_ ::= (accept_|add_|alter_|call_|cancel_|checkpoint_|close_|compute_|continue_
 |delete_|display_|divide_|enter_|enter_cobol_|evaluate_|exit_|free_|goto_|if_|initialize_|inspect_
@@ -245,7 +248,7 @@ instruction_ ::= (accept_|add_|alter_|call_|cancel_|checkpoint_|close_|compute_|
 //*******************************
 //VERBS of the procedure division
 accept_ ::= ACCEPT identifier_ [FROM (COBOLWORD|DATE [YYYYMMDD]|DAY [YYYYDDD]|DAY-OF-WEEK|TIME)]
-add_ ::= ADD [CORR|CORRESPONDING] identifier_or_literal_+ [TO (identifier_or_literal_ [ROUNDED])+] GIVING (identifier_ [ROUNDED])+ size_error_clause_ [END-ADD]
+add_ ::= ADD [CORR|CORRESPONDING] identifier_or_literal_+ [TO (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-ADD]
 alter_ ::= ALTER (paragraph_name_ TO [PROCEED TO] paragraph_name_)+
 call_ ::= CALL cobolword_or_literal_ [(IN|OF) file_name_] [using2_] [on_not_on_] [on_exception_] [END-CALL]
 cancel_ ::= CANCEL identifier_
@@ -259,53 +262,107 @@ display_ ::= DISPLAY identifier_or_literal_+ [UPON COBOLWORD] [[WITH] NO ADVANCI
 divide_ ::= DIVIDE identifier_or_literal_+ [(INTO|BY) (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+] [REMAINDER identifier_] size_error_clause_ [END-DIVIDE]
 enter_ ::= ENTER (STRING|COBOLWORD) cobolword_or_literal_ [(IN|OF) file_name_] [using3_] [GIVING identifier_]
 enter_cobol_ ::= ENTER COBOL DOT
-evaluate_ ::= //TODO
+evaluate_ ::= EVALUATE subject_list_ ((WHEN (object_list_|OTHER))+ instruction_+)+ [END-EVALUATE]
 exit_ ::= EXIT [(PROGRAM|PARAGRAPH|SECTION|PERFORM [CYCLE])]
 free_ ::= FREE identifier_
 goto_ ::= GO [TO] paragraph_name_+ [DEPENDING ON identifier_]
-if_ ::= //TODO
-initialize_ ::= //TODO
-inspect_ ::= //TODO
-lockfile_ ::= //TODO
-merge_ ::= //TODO
-move_ ::= /*TODO: finish .. */ MOVE [CORR|CORRESPONDING] identifier_or_literal_+ TO identifier_or_literal_
-multiply_ ::= //TODO
-open_ ::= //TODO
-perform_ ::= /*TODO: finish .. */ PERFORM paragraph_name_
-read_ ::= //TODO
-release_ ::= //TODO
+if_ ::= IF condition_ THEN instruction_+ [ELSE instruction_+] [END-IF]
+initialize_ ::= INITIALIZE identifier_ + [REPLACING ((ALPHABETIC|ALPHANUMERIC|NUMERIC|ALPHANUMERIC-EDITED|NUMERIC-EDITED) [DATA] BY identifier_or_literal_)+]
+inspect_ ::= INSPECT identifier_ [tallying_][replacing_][converting_]
+lockfile_ ::= LOCKFILE file_name_ [TIME LIMIT identifier_or_literal_]
+merge_ ::= MERGE file_name_ key_specifier_+ [collating_sequence_] using_+ output_specifier_
+move_ ::= MOVE [CORR|CORRESPONDING] identifier_or_literal_+ TO identifier_or_literal_
+multiply_ ::= MULTIPLY identifier_or_literal_+ [BY (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-MULTIPLY]
+open_ ::= OPEN (INPUT input_file_spec_|OUTPUT output_file_spec_|I-O io_file_spec_|EXTEND extend_file_spec_)
+perform_ ::= PERFORM (perform_unconditional_|perform_times_|perform_until_|perform_varying_)
+read_ ::= READ//TODO
+release_ ::= RELEASE//TODO
 //replace is like copy
-return_ ::= //TODO
-rewrite_ ::= //TODO
-search_ ::= //TODO
-set_ ::= //TODO
-sort_ ::= //TODO
-start_ ::= //TODO
-startbackup_ ::= //TODO
-stop_ ::= //TODO
-string_ ::= //TODO
-subtract_ ::= //TODO
-unlockfile_ ::= //TODO
-unlockrecord_ ::= //TODO
-unstring_ ::= //TODO
-use_ ::= //TODO
-write_ ::= //TODO
+return_ ::= RETURN//TODO
+rewrite_ ::= REWRITE//TODO
+search_ ::= SEARCH//TODO
+set_ ::= SET//TODO
+sort_ ::= SORT//TODO
+start_ ::= START//TODO
+startbackup_ ::= STARTBACKUP//TODO
+stop_ ::= STOP//TODO
+string_ ::= STRING//TODO
+subtract_ ::= SUBTRACT//TODO
+unlockfile_ ::= UNLOCKFILE//TODO
+unlockrecord_ ::= UNLOCKRECORD//TODO
+unstring_ ::= UNSTRING//TODO
+use_ ::= USE [GLOBAL] AFTER [STANDARD] (EXCEPTION|ERROR) PROCEDURE [ON] (file_name_|INPUT|OUTPUT|I-O|EXTEND) DOT
+write_ ::= WRITE//TODO
 
 //*******************************
 //Rules common to multiple procedure division verbs or sub-rules
 
-expression_arithmetic_ ::= expression_times_div_ { ( PLUS_SIGN_ | MINUS_SIGN_ ) expression_times_div_ }*
-expression_times_div_ ::= expression_power_ { ( TIMES_SIGN_ | DIVIDE_SIGN_ ) expression_power_ }*
-expression_power_ ::=	[ ( MINUS_SIGN_ | PLUS_SIGN_ ) ] expression_basis { POWER_SIGN_ expression_basis }*
-expression_basis	::=	( identifier_or_literal_ | OPAREN_SIGN_ expression_arithmetic_ CPAREN_SIGN_ )
+private subject_list_ ::= subject_ (ALSO subject_)*
+private subject_ ::= (identifier_or_literal_|expression_|TRUE|FALSE)
+private object_list_ ::= object_ (ALSO object_)*
+private object_ ::= (ANY|condition_|TRUE|FALSE|[NOT] range_)
+private range_ ::= (identifier_or_literal_|expression_) [(THROUGH|TRHU) (identifier_or_literal_|expression_)]
 
-on_exception_ ::= [ON] (EXCEPTION|OVERFLOW) instruction_
-on_not_on_ ::= on_exception_ [NOT [ON] EXCEPTION instruction_+]
-invalid_key_clause_ ::= [INVALID [KEY]  instruction_] [NOT INVALID [KEY] instruction_]
-size_error_clause_ ::= [[ON] SIZE ERROR instruction_] [NOT [ON] SIZE ERROR instruction_]
-using_ ::= USING identifier_+
-using2_ ::= USING ([ [BY] (REFERENCE|CONTENT|VALUE) ] identifier_+ )+
-using3_ ::= USING (identifier_|literal_|OPAREN_SIGN_ expression_arithmetic_ CPAREN_SIGN_|OMITTED)+
+expression_ ::= (expression_arithmetic_|expression_conditional_)
+
+private expression_arithmetic_ ::= expression_times_div_ { ( PLUS_SIGN_ | MINUS_SIGN_ ) expression_times_div_ }*
+private expression_times_div_ ::= expression_power_ { ( TIMES_SIGN_ | DIVIDE_SIGN_ ) expression_power_ }*
+private expression_power_ ::=	[ ( MINUS_SIGN_ | PLUS_SIGN_ ) ] expression_basis { POWER_SIGN_ expression_basis }*
+private expression_basis	::=	( identifier_or_literal_ | OPAREN_SIGN_ expression_arithmetic_ CPAREN_SIGN_ )
+
+expression_conditional_ ::= condition_
+condition_ ::=	( combinable_condition_ | combined_conditions_ )
+private combinable_condition_ ::= ( simple_condition_| negated_simple_conditions_| abbreviated_combined_relation_conditions_ )
+private simple_condition_ ::= (relation_condition_|class_condition_|condition_name_condition_|sign_condition_
+|switch_status_condition_|OPAREN_SIGN_ condition_ CPAREN_SIGN_)
+private class_condition_ ::= identifier_ [IS] [NOT] (NUMERIC|ALPHABETIC|ALPHABETIC-LOWER|ALPHABETIC-UPPER|COBOLWORD)
+private condition_name_condition_ ::= identifier_
+private relation_condition_	::=	condition_operand_ relational_operator_ condition_operand_
+private condition_operand_ ::= (identifier_or_literal_|expression_arithmetic_|NULL|NULLS|ADDRESS OF identifier_)
+private relational_operator_ ::= [NOT]
+(GREATER|LESS|EQUAL|GREATER_SIGN_|LESS_SIGN_|EQUAL_SIGN_|GREATER_EQUAL_SIGN_|LESS_EQUAL_SIGN_)
+[(THAN|TO)] [OR EUQAL [TO]]
+private sign_condition_	::= expression_arithmetic_ [IS] [NOT] (POSITIVE|NEGATIVE|ZERO)
+private switch_status_condition_	::=	identifier_
+private negated_simple_conditions_	::=	NOT condition_
+private abbreviated_combined_relation_conditions_	::=	relation_condition_ abbreviation_rest_
+private abbreviation_rest_	::=	{ (AND|OR) [NOT] [ relational_operator_ ] abbreviation_leaf_ }+
+private abbreviation_leaf_	::=	( condition_operand_ | OPAREN_SIGN_ condition_operand_ abbreviation_rest_ CPAREN_SIGN_ )
+private combined_conditions_	::=	combinable_condition_ { ( AND | OR) combinable_condition_ }+
+
+private tallying_ ::= TALLYING {identifier_ FOR (CHARACTERS position_*|(ALL|LEADING) identifier_or_literal_ position_* )+}+
+private replacing_::= REPLACING (CHARACTERS BY identifier_or_literal_ position_*|(ALL|LEADING|FIRST) {identifier_or_literal_ BY identifier_or_literal_ position_*}+)
+private converting_ ::= CONVERTING identifier_or_literal_ TO identifier_or_literal_ position_*
+private position_ ::= (BEFORE|AFTER) [INITIAL] identifier_or_literal_
+
+private on_exception_ ::= [ON] (EXCEPTION|OVERFLOW) instruction_
+private on_not_on_ ::= on_exception_ [NOT [ON] EXCEPTION instruction_+]
+private invalid_key_clause_ ::= [INVALID [KEY]  instruction_] [NOT INVALID [KEY] instruction_]
+private size_error_clause_ ::= [[ON] SIZE ERROR instruction_] [NOT [ON] SIZE ERROR instruction_]
+private using_ ::= USING identifier_+
+private using2_ ::= USING ([ [BY] (REFERENCE|CONTENT|VALUE) ] identifier_+ )+
+private using3_ ::= USING (identifier_|literal_|OPAREN_SIGN_ expression_arithmetic_ CPAREN_SIGN_|OMITTED)+
+private key_specifier_ ::= [ON] (ASCENDING|DESCENDING) [KEY] identifier_+
+private collating_sequence_ ::= [COLLATING] SEQUENCE [IS] COBOLWORD
+private output_specifier_ ::= (GIVING identifier_+|OUTPUT PROCEDURE [IS] paragraph_name_ (THROUGH|THRU) paragraph_name_)
+
+private input_file_spec_ ::= file_name_ [[WITH] TIME LIMITS] [(SHARED|PROTECED|EXCLUSIVE)] [(SYNCDEPTH literal_|REVERSED|[WITH] NO REWIND)]
+private output_file_spec_ ::= file_name_ [[WITH] TIME LIMITS] [(SHARED|PROTECED|EXCLUSIVE)] [(SYNCDEPTH literal_|[WITH] NO REWIND)]
+private io_file_spec_ ::= file_name_ [[WITH] TIME LIMITS] [(SHARED|PROTECED|EXCLUSIVE)] [SYNCDEPTH literal_]
+private extend_file_spec_ ::= io_file_spec_
+
+private perform_unconditional_ ::= (procedure_group_|instruction_* END-PERFORM)
+private perform_times_ ::= (procedure_group_ identifier_or_literal_ TIMES|identifier_or_literal_ TIMES instruction_* END-PERFORM)
+private perform_until_ ::= (procedure_group_ [test_site_] UNTIL condition_|[test_site_] UNTIL condition_ instruction_* END-PERFORM)
+private perform_varying_ ::= (procedure_group_ [test_site_] varying_phrase_ after_phrase_+|[test_site_] varying_phrase_ after_phrase_+ instruction_* END-PERFORM)
+private procedure_group_ ::= paragraph_name_ [(THROUGH|THRU) paragraph_name_]
+private test_site_ ::= [WITH] TEST (BEFORE|AFTER)
+private varying_phrase_ ::= VARYING literal_ FROM identifier_or_literal_ BY identifier_or_literal_ UNTIL condition_
+private after_phrase_ ::= AFTER literal_ FROM identifier_or_literal_ BY identifier_or_literal_ UNTIL condition_
+//*******************************
+//Intrisic functions
+//*******************************
+//TODO
 
 //*******************************
 //General tokens

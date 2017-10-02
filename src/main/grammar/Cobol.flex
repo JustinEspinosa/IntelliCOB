@@ -43,13 +43,17 @@ DIVIDE_SIGN_="/"
 POWER_SIGN_="**"
 OPAREN_SIGN_="("
 CPAREN_SIGN_=")"
+GREATER_SIGN_=">"
+LESS_SIGN_="<"
+GREATER_EQUAL_SIGN_=">="
+LESS_EQUAL_SIGN_="<="
 COLON_SIGN_=":"
 STRING_START=(H|X|N|n)?\"
 GUARDIAN_FILE=(\${COBOLWORD})({DOT}\#?{COBOLWORD})?({DOT}{COBOLWORD})?
 DEFINE=\={COBOLWORD}
 
 %{
-   private boolean returnTokens = false;
+   private boolean returnTokens = true;
    private int previousState = YYINITIAL;
    private int codeState = CODE_STATE;
 
@@ -60,10 +64,11 @@ DEFINE=\={COBOLWORD}
    }
 
    private void specialCode(int state){
-       codeState(state, true);
+       codeState(state, false);
    }
+
    private void normalCode(){
-       codeState(CODE_STATE, false);
+       codeState(CODE_STATE, true);
    }
 
    private IElementType cobolWordToken(){
@@ -78,9 +83,6 @@ DEFINE=\={COBOLWORD}
        previousState = yystate();
        yybegin(state);
    }
-
-
-
 
 %}
 
@@ -115,13 +117,13 @@ DEFINE=\={COBOLWORD}
 <POSTPREPROCESSOR>
 {
   {PREPROCESSOR_INDICATOR} { state(PREPROCESSOR_STATE); }
-  . {rewind(); normalCode(); state(YYINITIAL); return PREPROCESSOR; }
+  .|{CRLF} {rewind(); normalCode(); state(YYINITIAL); return PREPROCESSOR; }
 }
 
 <COMMENT_STATE>
 {
  {COMMENT_ENTRY} { if(returnTokens){return COMMENT;} }
- {CRLF}          { state(codeState); if(returnTokens){return WHITE_SPACE;}  }
+ {CRLF}          { state(YYINITIAL); if(returnTokens){return WHITE_SPACE;}  }
 }
 
 <STRING_STATE>
@@ -177,6 +179,10 @@ DEFINE=\={COBOLWORD}
  {POWER_SIGN_}              { return POWER_SIGN_; }
  {OPAREN_SIGN_}             { return OPAREN_SIGN_; }
  {CPAREN_SIGN_}             { return CPAREN_SIGN_; }
+ {GREATER_SIGN_}            { return GREATER_SIGN_; }
+ {LESS_SIGN_}               { return LESS_SIGN_; }
+ {GREATER_EQUAL_SIGN_}      { return GREATER_EQUAL_SIGN_; }
+ {LESS_EQUAL_SIGN_}         { return LESS_EQUAL_SIGN_; }
  {COLON_SIGN_}              { return COLON_SIGN_; }
  {COBOLWORD}                { return cobolWordToken(); }
  {DEFINE}                   { return DEFINE; }
