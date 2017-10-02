@@ -24,7 +24,8 @@ public class CobolStructureViewTreeElement implements StructureViewTreeElement {
     static {
         ALLOWED_ELEMENTS.put(CobolFile.class, (PsiFile psiElement) -> psiElement.getName());
         ALLOWED_ELEMENTS.put(CobolCobolProgram_Impl.class, (CobolCobolProgram_Impl psiElement) -> psiElement.getIdentificationDivision_().getProgramId_().getProgramIdName_().getText());
-        ALLOWED_ELEMENTS.put(CobolIdentificationDivision_Impl.class, psiElement -> "PROCEDURE");
+        ALLOWED_ELEMENTS.put(CobolIdentificationDivision_Impl.class, psiElement -> "IDENTIFICATION");
+        ALLOWED_ELEMENTS.put(CobolEnvironmentDivision_Impl.class, psiElement -> "ENVIRONMENT");
         ALLOWED_ELEMENTS.put(CobolDataDivision_Impl.class, psiElement -> "DATA");
         ALLOWED_ELEMENTS.put(CobolFileSection_Impl.class, psiElement -> "FILE");
         ALLOWED_ELEMENTS.put(CobolWorkingStorageSection_Impl.class, psiElement -> "WORKING-STORAGE");
