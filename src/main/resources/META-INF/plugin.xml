@@ -1,0 +1,38 @@
+<idea-plugin>
+    <id>com.github.justinespinosa.intellicob</id>
+    <name>IntelliCob</name>
+    <version>1.0</version>
+    <vendor email="support@justinespinosa.github.com" url="http://github.com/JustinEspinosa">JustinEspinosa</vendor>
+
+    <description><![CDATA[
+    ]]></description>
+
+    <change-notes><![CDATA[
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="145.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <fileTypeFactory implementation="com.github.justinespinosa.intellicob.filetype.CobolFileTypeFactory"/>
+        <lang.parserDefinition language="Cobol"
+                               implementationClass="com.github.justinespinosa.intellicob.parser.CobolParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="Cobol"
+                                       implementationClass="com.github.justinespinosa.intellicob.highlight.CobolSyntaxHighlighterFactory"/>
+        <lang.psiStructureViewFactory language="Cobol"
+                                      implementationClass="com.github.justinespinosa.intellicob.structureview.CobolStructureViewFactory"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+</idea-plugin>

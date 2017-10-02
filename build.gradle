@@ -1,0 +1,93 @@
+import org.jetbrains.grammarkit.tasks.GenerateLexer
+import org.jetbrains.grammarkit.tasks.GenerateParser
+
+
+buildscript {
+    repositories {
+        maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
+        maven { url 'https://jitpack.io' }
+    }
+    dependencies {
+        classpath "com.github.hurricup:gradle-grammar-kit-plugin:2017.1.1"
+    }
+}
+
+plugins {
+    id "org.jetbrains.intellij" version "0.2.17"
+}
+
+apply plugin: 'java'
+
+
+apply plugin: 'org.jetbrains.intellij'
+
+intellij {
+    version '172.3544.35'
+    pluginName 'IntelliCOB'
+}
+
+
+group 'com.github.justinespinosa.intellicob'
+version '1.0'
+
+def genRoot = file('gen')
+
+sourceSets {
+    main {
+        java.srcDirs 'src', genRoot
+    }
+}
+
+apply plugin: 'idea'
+idea {
+    module {
+        generatedSourceDirs += genRoot
+    }
+}
+
+
+apply plugin: 'org.jetbrains.grammarkit'
+
+grammarKit {
+    jflexRelease = '1.7.0'
+    grammarKitRelease = '1.5.2'
+}
+
+task generateCobolParser(type: GenerateParser) {
+    source = "src/main/grammar/Cobol.bnf"
+    targetRoot = genRoot
+    pathToParser = '/com/github/justinespinosa/intellicob/parser/CobolParser.java'
+    pathToPsiRoot = '/com/github/justinespinosa/intellicob/psi'
+    purgeOldFiles = true
+}
+
+task generateCobolLexer(type: GenerateLexer) {
+    dependsOn generateCobolParser
+    source = "src/main/grammar/Cobol.flex"
+    targetDir = "gen/com/github/justinespinosa/intellicob/lexer/"
+    targetClass = "CobolLexer"
+    skeleton = "src/main/grammar/idea-flex.skeleton"
+    purgeOldFiles = true
+}
+
+
+task generatesLexers {
+    dependsOn generateCobolLexer
+}
+
+// doesn't work
+jar.archiveName = "camelcade.jar"
+
+
+compileJava {
+    dependsOn generatesLexers
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
