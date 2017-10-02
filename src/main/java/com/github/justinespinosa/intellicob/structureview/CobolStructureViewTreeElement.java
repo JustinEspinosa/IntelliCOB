@@ -1,5 +1,6 @@
 package com.github.justinespinosa.intellicob.structureview;
 
+import com.github.justinespinosa.intellicob.psi.CobolFile;
 import com.github.justinespinosa.intellicob.psi.impl.*;
 import com.github.justinespinosa.intellicob.resources.CobolIcons;
 import com.intellij.ide.structureView.StructureViewTreeElement;
@@ -21,7 +22,7 @@ public class CobolStructureViewTreeElement implements StructureViewTreeElement {
     private static Map<Class<?>, Function<? extends PsiElement, String>> ALLOWED_ELEMENTS = new HashMap<>();
 
     static {
-        ALLOWED_ELEMENTS.put(PsiFile.class, (PsiFile psiElement) -> psiElement.getName());
+        ALLOWED_ELEMENTS.put(CobolFile.class, (PsiFile psiElement) -> psiElement.getName());
         ALLOWED_ELEMENTS.put(CobolCobolProgram_Impl.class, (CobolCobolProgram_Impl psiElement) -> psiElement.getIdentificationDivision_().getProgramId_().getProgramIdName_().getText());
         ALLOWED_ELEMENTS.put(CobolIdentificationDivision_Impl.class, psiElement -> "PROCEDURE");
         ALLOWED_ELEMENTS.put(CobolDataDivision_Impl.class, psiElement -> "DATA");
