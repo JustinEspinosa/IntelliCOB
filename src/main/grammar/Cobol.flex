@@ -43,16 +43,28 @@ DIVIDE_SIGN_="/"
 POWER_SIGN_="**"
 OPAREN_SIGN_="("
 CPAREN_SIGN_=")"
+COLON_SIGN_=":"
 STRING_START=(H|X|N|n)?\"
-GUARDIAN_FILE=(\${COBOLWORD}{DOT})?({COBOLWORD}{DOT})?{COBOLWORD}
+GUARDIAN_FILE=(\${COBOLWORD})({DOT}\#?{COBOLWORD})?({DOT}{COBOLWORD})?
 DEFINE=\={COBOLWORD}
 
 %{
-
-
+   private boolean returnTokens = false;
    private int previousState = YYINITIAL;
-   private int stateAfterPseudoText = YYINITIAL;
-   private int stateAfterString = YYINITIAL;
+   private int codeState = CODE_STATE;
+
+   private void codeState(int state, boolean retTokens){
+        state(state);
+        codeState = state;
+        returnTokens = retTokens;
+   }
+
+   private void specialCode(int state){
+       codeState(state, true);
+   }
+   private void normalCode(){
+       codeState(CODE_STATE, false);
+   }
 
    private IElementType cobolWordToken(){
        return CobolTokenTypeFactory.getToken(yytext());
@@ -68,52 +80,75 @@ DEFINE=\={COBOLWORD}
    }
 
 
+
+
 %}
 
-%state COMMENT_STATE CODE_STATE STRING_STATE PSEUDOTEXT_STATE PREPROCESSOR_STATE
+%state COMMENT_STATE CODE_STATE STRING_STATE PSEUDOTEXT_STATE
+%state PREPROCESSOR_STATE POSTPREPROCESSOR
 %state PRECOMMENT COMMENT_ENTRY_STATE
 %state PRECOMPUTERNAME COMPUTER_NAME_STATE POSTCOMPUTERNAME
-%state PREOBJECTCOMPUTERNAME PREOBJECTCOMPUTERNAME2 OBJECT_COMPUTER_NAME_STATE
+%state PREOBJECTCOMPUTERNAME OBJECT_COMPUTER_NAME_STATE POSTOBJECTCOMPUTERNAME
 %state PREPICTURESTRING PICTURE_STRING_STATE
+%state EMBEDDED_SQL_STATE
 //The strange case of COPY and REPLACE: instructions which are preprocessor directives...
-%state COPY_STATE1 COPY_STATE2 COPY_STATE3 COPY_STATE4 COPY_STATE5 COPY_STATE6 COPY_STATE7 COPY_STATE8 COPY_STATE9
-%state REPLACE_STATE1 REPLACE_STATE2 REPLACE_STATE3 REPLACE_STATE4 REPLACE_STATE5
+%state COPY_STATE REPLACE_STATE
 
 %%
 
 <YYINITIAL>
 {
- {CODE_INDICATOR}         { state(CODE_STATE); return CODE_INDICATOR; }
- {COMMENT_INDICATOR}      { state(COMMENT_STATE); return COMMENT_INDICATOR; }
- {PAGE_INDICATOR}         { state(COMMENT_STATE); return PAGE_INDICATOR; }
- {PREPROCESSOR_INDICATOR} { state(PREPROCESSOR_STATE); return PREPROCESSOR_INDICATOR; }
- {CRLF}                   { return WHITE_SPACE; }
+ {CODE_INDICATOR}         { state(codeState); if(returnTokens){return CODE_INDICATOR;} }
+ {COMMENT_INDICATOR}      { state(COMMENT_STATE); if(returnTokens){return COMMENT_INDICATOR;} }
+ {PAGE_INDICATOR}         { state(COMMENT_STATE); if(returnTokens){return PAGE_INDICATOR;} }
+ {PREPROCESSOR_INDICATOR} { specialCode(PREPROCESSOR_STATE); if(returnTokens){return PREPROCESSOR_INDICATOR;} }
+ {CRLF}                   { if(returnTokens){return WHITE_SPACE;} }
  .                        { return BAD_CHARACTER; }
 }
 
 <PREPROCESSOR_STATE>
 {
- {PREPROCESSOR}  { return PREPROCESSOR; }
- {CRLF}          { state(YYINITIAL);  return WHITE_SPACE;  }
+ {CRLF} { state(POSTPREPROCESSOR);  }
+ . {}
+}
+
+<POSTPREPROCESSOR>
+{
+  {PREPROCESSOR_INDICATOR} { state(PREPROCESSOR_STATE); }
+  . {rewind(); normalCode(); state(YYINITIAL); return PREPROCESSOR; }
 }
 
 <COMMENT_STATE>
 {
- {COMMENT_ENTRY} { return COMMENT; }
- {CRLF}          { state(YYINITIAL);  return WHITE_SPACE;  }
+ {COMMENT_ENTRY} { if(returnTokens){return COMMENT;} }
+ {CRLF}          { state(codeState); if(returnTokens){return WHITE_SPACE;}  }
 }
 
 <STRING_STATE>
 {
- \"          { state(stateAfterString); return STRING; }
+ \"          { state(codeState); if(returnTokens){return STRING;} }
  .           { }
 }
 
+<PSEUDOTEXT_STATE>
+{
+ {DOUBLE_EQUAL} { state(codeState); }
+ .              { }
+}
+
+<EMBEDDED_SQL_STATE>
+{
+   \"          { state(STRING_STATE); }
+   "END-EXEC"  { normalCode(); return EMBEDDED_SQL; }
+   .           {}
+   {CRLF}      { state(YYINITIAL); }
+}
 
 <CODE_STATE>
 {
 
- {STRING_START}             { state(STRING_STATE); stateAfterString=CODE_STATE;}
+ {STRING_START}             { state(STRING_STATE); }
+ "EXEC"                     { specialCode(EMBEDDED_SQL_STATE); }
 
  //special rules needing extra states
  "AUTHOR"                   { state(PRECOMMENT); return cobolWordToken();}
@@ -127,8 +162,8 @@ DEFINE=\={COBOLWORD}
  "PICTURE"                  { state(PREPICTURESTRING); return cobolWordToken();}
 
  //if you still don't know ... see the other comments about copy and replace
- "COPY"                     { state(COPY_STATE1); }
- "REPLACE"                  { state(REPLACE_STATE1); }
+ "COPY"                     { specialCode(COPY_STATE); }
+ "REPLACE"                  { specialCode(REPLACE_STATE); }
 
  //reserved word in grammar kit
  "EXTERNAL"                 { return W_EXTERNAL; }
@@ -142,109 +177,37 @@ DEFINE=\={COBOLWORD}
  {POWER_SIGN_}              { return POWER_SIGN_; }
  {OPAREN_SIGN_}             { return OPAREN_SIGN_; }
  {CPAREN_SIGN_}             { return CPAREN_SIGN_; }
+ {COLON_SIGN_}              { return COLON_SIGN_; }
  {COBOLWORD}                { return cobolWordToken(); }
  {DEFINE}                   { return DEFINE; }
  {GUARDIAN_FILE}            { return GUARDIAN_FILE; }
  {INTEGER_}                 { return INTEGER_; }
  {NUMBER_}                  { return NUMBER_; }
  {DOT}                      { return DOT; }
- {CRLF}                     { state(YYINITIAL);  return WHITE_SPACE; }
+ {CRLF}                     { state(YYINITIAL); return WHITE_SPACE; }
  {WHITE_SPACE}              { return WHITE_SPACE;  }
 }
 
 // special states for complicated constructs
 
-<PSEUDOTEXT_STATE>
-{
- {DOUBLE_EQUAL} { state(stateAfterPseudoText); }
- .              { }
-}
 //For the special REPLACE statement that cannot be handled by GrammarKit (preprocessor)
-<REPLACE_STATE1>
+<REPLACE_STATE>
 {
-  {DOUBLE_EQUAL} {state(PSEUDOTEXT_STATE); stateAfterPseudoText=REPLACE_STATE2; }
-  {EXT_SPACE_CRLF} {}
-  "OFF"         {state(REPLACE_STATE5);}
+  {DOUBLE_EQUAL} { state(PSEUDOTEXT_STATE); }
+  {DOT}          { normalCode(); return REPLACE_PREPROCESSOR;}
+  {CRLF}         { state(YYINITIAL); }
+  .              { }
 }
-<REPLACE_STATE2>
+//For the special COPY statement that cannot be handled by GrammarKit (preprocessor)
+<COPY_STATE>
 {
-  "BY" {state(REPLACE_STATE3);}
-  {EXT_SPACE_CRLF} {}
-}
-<REPLACE_STATE3>
-{
-  {DOUBLE_EQUAL} {state(PSEUDOTEXT_STATE); stateAfterPseudoText=REPLACE_STATE4; }
-  {EXT_SPACE_CRLF} {}
-}
-<REPLACE_STATE4>
-{
-  {DOUBLE_EQUAL} {state(PSEUDOTEXT_STATE); stateAfterPseudoText=REPLACE_STATE1; }
-  {DOT} {state(CODE_STATE); return REPLACE_PREPROCESSOR; }
-  {EXT_SPACE_CRLF} {}
-}
-<REPLACE_STATE5>
-{
-  {DOT} {state(CODE_STATE); return REPLACE_PREPROCESSOR; }
-  {EXT_SPACE_CRLF} {}
+  \"             { state(STRING_STATE); }
+  {DOUBLE_EQUAL} { state(PSEUDOTEXT_STATE);  }
+  {DOT}          { normalCode(); return COPY_PREPROCESSOR;}
+  {CRLF}         { state(YYINITIAL); }
+  .              { }
 }
 
-//For the special COPY statement that cannot be handled by GrammarKit (preprocessor)
-<COPY_STATE1>
-{
-  {COBOLWORD} {state(COPY_STATE2);}
-  {EXT_SPACE_CRLF} {}
-}
-<COPY_STATE2>
-{
-  ("IN"|"OF") {state(COPY_STATE3);}
-  "REPLACING" {state(COPY_STATE5);}
-  {EXT_SPACE_CRLF} {}
-  {DOT} { state(CODE_STATE); return COPY_PREPROCESSOR;}
-}
-<COPY_STATE3>
-{
-  \"?{GUARDIAN_FILE}\"? {state(COPY_STATE4);}
-  {EXT_SPACE_CRLF} {}
-}
-<COPY_STATE4>
-{
-  "REPLACING" {state(COPY_STATE5);}
-  {EXT_SPACE_CRLF} {}
-  {DOT} { state(CODE_STATE); return COPY_PREPROCESSOR;}
-}
-<COPY_STATE5>
-{
-  "OFF" {state(COPY_STATE9);}
-  \" {state(STRING_STATE); stateAfterString=COPY_STATE6; }
-  {DOUBLE_EQUAL} {state(PSEUDOTEXT_STATE); stateAfterPseudoText=COPY_STATE6; }
-  {COBOLWORD}  {state(COPY_STATE6); }
-  {EXT_SPACE_CRLF} {}
-}
-<COPY_STATE6>
-{
-  "BY" {state(COPY_STATE7);}
-  {EXT_SPACE_CRLF} {}
-}
-<COPY_STATE7>
-{
-  \" {state(STRING_STATE); stateAfterString=COPY_STATE8; }
-  {DOUBLE_EQUAL} {state(PSEUDOTEXT_STATE); stateAfterPseudoText=COPY_STATE8;}
-  {COBOLWORD}  {state(COPY_STATE8); }
-  {EXT_SPACE_CRLF} {}
-}
-<COPY_STATE8>
-{
-  \" {state(STRING_STATE); stateAfterString=COPY_STATE5; }
-  {DOUBLE_EQUAL} {state(PSEUDOTEXT_STATE); stateAfterPseudoText=COPY_STATE5; }
-  {COBOLWORD}  {state(COPY_STATE5); }
-  {DOT} { state(CODE_STATE); return COPY_PREPROCESSOR;}
-  {EXT_SPACE_CRLF} {}
-}
-<COPY_STATE9>
-{
-  {DOT} { state(CODE_STATE); return COPY_PREPROCESSOR;}
-  {EXT_SPACE_CRLF} {}
-}
 
 //For the comment entries in the procedure division
 <PRECOMMENT>
@@ -276,28 +239,38 @@ DEFINE=\={COBOLWORD}
 <POSTCOMPUTERNAME>
 {
  {DOT}       { state(YYINITIAL); return DOT; }
- "WITH"      { state(YYINITIAL); return WITH; }
- "DEBUGGING" { state(YYINITIAL); return DEBUGGING; }
+ "WITH"      { state(YYINITIAL); return cobolWordToken(); }
+ "DEBUGGING" { state(YYINITIAL); return cobolWordToken(); }
 }
 
 //for object-computer
 <PREOBJECTCOMPUTERNAME>
 {
- {DOT}       { state(PREOBJECTCOMPUTERNAME2); return DOT; }
+ {DOT}       { state(OBJECT_COMPUTER_NAME_STATE); return DOT; }
  {EXT_SPACE} { return WHITE_SPACE; }
-}
-
-<PREOBJECTCOMPUTERNAME2>
-{
- {EXT_SPACE} { return WHITE_SPACE; }
- .           { state(OBJECT_COMPUTER_NAME_STATE); rewind(); }
 }
 
 <OBJECT_COMPUTER_NAME_STATE>
 {
- {WHITE_SPACE} { state(CODE_STATE); rewind(); return OBJECT_COMPUTER_NAME; }
- {CRLF}        { state(YYINITIAL); rewind(); return OBJECT_COMPUTER_NAME; }
- .             { }
+ {DOT}           { state(POSTCOMPUTERNAME); rewind(); return COMPUTER_NAME; }
+ "MEMORY-SIZE"   { state(POSTCOMPUTERNAME); rewind(); return COMPUTER_NAME; }
+ "PROGRAM"       { state(POSTCOMPUTERNAME); rewind(); return COMPUTER_NAME; }
+ "PROGRAM"       { state(POSTCOMPUTERNAME); rewind(); return COMPUTER_NAME; }
+ "SEQUENCE"      { state(POSTCOMPUTERNAME); rewind(); return COMPUTER_NAME; }
+ "SEGMENT-LIMIT" { state(POSTCOMPUTERNAME); rewind(); return COMPUTER_NAME; }
+ "CHARACTER-SET" { state(POSTCOMPUTERNAME); rewind(); return COMPUTER_NAME; }
+ .               { }
+}
+
+<POSTOBJECTCOMPUTERNAME>
+{
+ {DOT}           { state(YYINITIAL); return DOT; }
+ "MEMORY-SIZE"   { state(YYINITIAL); return cobolWordToken(); }
+ "PROGRAM"       { state(YYINITIAL); return cobolWordToken(); }
+ "PROGRAM"       { state(YYINITIAL); return cobolWordToken(); }
+ "SEQUENCE"      { state(YYINITIAL); return cobolWordToken(); }
+ "SEGMENT-LIMIT" { state(YYINITIAL); return cobolWordToken(); }
+ "CHARACTER-SET" { state(YYINITIAL); return cobolWordToken(); }
 }
 
 //for picture strings

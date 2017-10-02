@@ -23,7 +23,8 @@ import static com.intellij.psi.TokenType.WHITE_SPACE;
 public class CobolParserDefinition implements ParserDefinition {
     public static final TokenSet WHITE_SPACES = TokenSet.create(WHITE_SPACE, CODE_INDICATOR, COMMENT_INDICATOR,
             PAGE_INDICATOR, PREPROCESSOR_INDICATOR);
-    public static final TokenSet COMMENTS = TokenSet.create(COMMENT, PREPROCESSOR, COPY_PREPROCESSOR, REPLACE_PREPROCESSOR);
+    public static final TokenSet COMMENTS = TokenSet.create(COMMENT, PREPROCESSOR, COPY_PREPROCESSOR,
+            REPLACE_PREPROCESSOR, EMBEDDED_SQL);
     public static final TokenSet STRINGS = TokenSet.create(STRING);
 
     public static final IFileElementType FILE = new IFileElementType(CobolLanguage.INSTANCE);

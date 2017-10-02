@@ -19,7 +19,7 @@
 cobolFile ::= cobol_program_+
 
 private independant_tokens_ ::= COMMENT COMMENT_INDICATOR PAGE_INDICATOR CODE_INDICATOR
-PREPROCESSOR_INDICATOR PREPROCESSOR COPY_PREPROCESSOR REPLACE_PREPROCESSOR
+PREPROCESSOR_INDICATOR PREPROCESSOR COPY_PREPROCESSOR REPLACE_PREPROCESSOR EMBEDDED_SQL
 
 cobol_source ::= cobol_program_+
 cobol_program_ ::= identification_division_
@@ -44,11 +44,11 @@ end_program_ ::= END PROGRAM DOT COBOLWORD DOT
 
 //################
 program_id_     ::= PROGRAM_ID DOT COBOLWORD DOT
-author_         ::= AUTHOR DOT COMMENT_ENTRY
-installation_   ::= INSTALLATION DOT COMMENT_ENTRY
-date_written_   ::= DATE-WRITTEN DOT COMMENT_ENTRY
-date_compiled_  ::= DATE-COMPILED DOT COMMENT_ENTRY
-security_       ::= SECURITY DOT COMMENT_ENTRY
+author_         ::= AUTHOR DOT [COMMENT_ENTRY]
+installation_   ::= INSTALLATION DOT [COMMENT_ENTRY]
+date_written_   ::= DATE-WRITTEN DOT [COMMENT_ENTRY]
+date_compiled_  ::= DATE-COMPILED DOT [COMMENT_ENTRY]
+security_       ::= SECURITY DOT [COMMENT_ENTRY]
 
 //*******************************
 //ENVIRONMENT DIVISION
@@ -68,7 +68,7 @@ configuration_section_ ::= CONFIGURATION SECTION DOT
 source_computer_ ::= SOURCE_COMPUTER DOT COMPUTER_NAME [ [WITH] DEBUGGING MODE ] DOT
 
 //################
-object_computer_ ::= OBJECT_COMPUTER DOT OBJECT_COMPUTER_NAME
+object_computer_ ::= OBJECT_COMPUTER DOT COMPUTER_NAME
  [memory_size_]
  [program_collating_sequence_]
  [segment_limit_]
@@ -108,9 +108,7 @@ input_output_section_ ::= INPUT-OUTPUT SECTION DOT
 [receive_control_]
 
 //################
-file_control_ ::= FILE-CONTROL
- file_control_clause_+
- DOT
+file_control_ ::= FILE-CONTROL DOT file_control_clause_+
 file_control_clause_ ::= select_ assign_
  [reserve_]
  [organization_]
@@ -120,6 +118,7 @@ file_control_clause_ ::= select_ assign_
  [alternate_record_key_+]
  [record_key_]
  [file_status_]
+ DOT
 select_ ::= SELECT [OPTIONAL] COBOLWORD
 assign_ ::= ASSIGN [TO] file_name_
 reserve_ ::= RESERVE INTEGER_ (AREA|AREAS)
@@ -178,22 +177,23 @@ linkage_sections_ ::=  LINKAGE SECTION DOT data_item_*
 
 //################
 file_description_ ::= (FD|SD) COBOLWORD
-[external2_]
-[global_]
-[block_contains_]
-[record_contains_]
-[label_records_]
-[value_of_]
-[data_records_]
-[linage_]
-[code_set_]
-[report2_]
+(external2_
+|global_
+|block_contains_
+|record_contains_
+|label_records_
+|value_of_
+|data_records_
+|linage_
+|code_set_
+|report2_)+
+DOT
 external2_ ::= [IS] W_EXTERNAL
 global_ ::= [IS] GLOBAL
 block_contains_ ::= BLOCK [CONTAINS] INTEGER_ [TO INTEGER_] (RECORDS|CHARACTERS)
 record_contains_ ::= RECORD (contains_fix_|contains_varying_)
 contains_fix_ ::= [CONTAINS] INTEGER_ [TO INTEGER_] [CHARACTERS]
-contains_varying_ ::= [IS] VARYING [IN] [SIZE] ([FROM] INTEGER_ [TO INTEGER_] CHARACTERS|DEPENDING [ON] identifier_)
+contains_varying_ ::= [IS] VARYING [IN] [SIZE] ([FROM] INTEGER_ [TO INTEGER_] [CHARACTERS]|DEPENDING [ON] identifier_)
 label_records_ ::= LABEL (RECORD [IS]|RECORDS [ARE]) (STANDARD|OMITTED)
 value_of_ ::= VALUE OF (COBOLWORD [OF] identifier_or_literal_)+
 data_records_ ::= DATA RECORDS (RECORD [IS]|RECORDS [ARE]) COBOLWORD+
@@ -203,27 +203,27 @@ report2_ ::= (REPORT [IS]|REPORTS [ARE]) COBOLWORD
 
 //################
 data_item_ ::= INTEGER_ (COBOLWORD|FILLER) [data_type_description_] DOT
-data_type_description_ ::= [redefines_]
- [external2_]
- [global_]
- [picture_]
- [usage_]
- [sign_]
- [occurs_]
- [synchronized_]
- [justified_]
- [blank_when_zero_]
- [value_]
+data_type_description_ ::= (redefines_
+ |external2_
+ |global_
+ |picture_
+ |usage_
+ |sign_
+ |occurs_
+ |synchronized_
+ |justified_
+ |blank_when_zero_
+ |value_)*
 redefines_ ::= REDEFINES COBOLWORD
 picture_ ::= (PICTURE|PIC) [IS] PICTURE_STRING
 usage_ ::= [USAGE] [IS] (BINARY|COMPUTATIONAL|COMP|COMPUTATIONAL-3|COMP-3|COMPUTATIONAL-5|COMP-5|DISPLAY|INDEX|NATIVE-2|NATIVE-4|NATIVE-8|PACKED-DECIMAL|POINTER)
-sign_ ::= [SIGN][IS] (LEADING|TRAILING) [[SEPARATE] CHARACTER]
+sign_ ::= [SIGN][IS] (LEADING|TRAILING) [SEPARATE [CHARACTER]]
 occurs_ ::= OCCURS INTEGER_ [TO INTEGER_] [TIMES] [DEPENDING [ON] identifier_] key_order_* [INDEXED [BY] COBOLWORD+]
 key_order_ ::= (ASCENDING|DESCENDING) [KEY] [IS] COBOLWORD+
 synchronized_ ::= (SYNCHRONIZED|SYNC) [(LEFT|RIGHT)]
 justified_ ::= (JUSTIFIED|JUST) [RIGHT]
 blank_when_zero_ ::= BLANK [WHEN] ZERO
-value_  ::= VALUE [IS] literal_
+value_  ::= VALUE [IS] (literal_phrase_|literal_)+
 
 //*******************************
 //PROCEDURE DIVISION
@@ -237,7 +237,7 @@ sentence_ ::= (instruction_* DOT|paragraph_header_)
 paragraph_header_ ::= paragraph_name_ [SECTION [INTEGER_]] DOT
 
 instruction_ ::= (accept_|add_|alter_|call_|cancel_|checkpoint_|close_|compute_|continue_
-|delete_|display_|divide_|enter_|enter_cobol_|evaluate_|exit_|goto_|if_|initialize_|inspect_
+|delete_|display_|divide_|enter_|enter_cobol_|evaluate_|exit_|free_|goto_|if_|initialize_|inspect_
 |lockfile_|merge_|move_|multiply_|open_|perform_|read_|release_|return_|rewrite_
 |search_|set_|sort_|start_|startbackup_|stop_|string_|subtract_|unlockfile_|unlockrecord_
 |unstring_|use_|write_)
@@ -261,6 +261,7 @@ enter_ ::= ENTER (STRING|COBOLWORD) cobolword_or_literal_ [(IN|OF) file_name_] [
 enter_cobol_ ::= ENTER COBOL DOT
 evaluate_ ::= //TODO
 exit_ ::= EXIT [(PROGRAM|PARAGRAPH|SECTION|PERFORM [CYCLE])]
+free_ ::= FREE identifier_
 goto_ ::= GO [TO] paragraph_name_+ [DEPENDING ON identifier_]
 if_ ::= //TODO
 initialize_ ::= //TODO
@@ -314,7 +315,7 @@ literal_ ::= [ALL] literal_values_
 literal_values_ ::= (INTEGER_|NUMBER_|STRING|ZERO|ZEROS|ZEROES|SPACE|SPACES|
 HIGH_VALUE|HIGH_VALUES|LOW_VALUE|LOW_VALUES|QUOTE|QUOTES)
 cobolword_or_literal_ ::= (COBOLWORD|literal_)
-identifier_ ::= COBOLWORD [parent_identifier_*]
+identifier_ ::= COBOLWORD parent_identifier_* [subscript_]
 identifier_or_literal_ ::= (identifier_|literal_)
 parent_identifier_ ::= (OF|IN) COBOLWORD
-
+subscript_ ::= OPAREN_SIGN_ identifier_or_literal_ [COLON_SIGN_ identifier_or_literal_] CPAREN_SIGN_
