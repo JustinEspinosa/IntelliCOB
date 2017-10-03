@@ -271,28 +271,28 @@ initialize_ ::= INITIALIZE identifier_ + [REPLACING ((ALPHABETIC|ALPHANUMERIC|NU
 inspect_ ::= INSPECT identifier_ [tallying_][replacing_][converting_]
 lockfile_ ::= LOCKFILE file_name_ [TIME LIMIT identifier_or_literal_]
 merge_ ::= MERGE file_name_ key_specifier_+ [collating_sequence_] using_+ output_specifier_
-move_ ::= MOVE [CORR|CORRESPONDING] identifier_or_literal_+ TO identifier_or_literal_
+move_ ::= MOVE [CORR|CORRESPONDING] identifier_or_literal_ TO identifier_or_literal_+
 multiply_ ::= MULTIPLY identifier_or_literal_+ [BY (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-MULTIPLY]
 open_ ::= OPEN (INPUT input_file_spec_|OUTPUT output_file_spec_|I-O io_file_spec_|EXTEND extend_file_spec_)
 perform_ ::= PERFORM (perform_procedure_|perform_instructions_)
-read_ ::= READ//TODO
+read_ ::= READ file_name_ [(NEXT|RESERVED)] [RECORD] [INTO identifier_] [[WITH] (LOCK|PROMPT identifier_)] [time_limit_] at_end_ [END-READ]
 release_ ::= RELEASE identifier_ [FROM identifier_]
 //replace is like copy
-return_ ::= RETURN//TODO
-rewrite_ ::= REWRITE//TODO
-search_ ::= SEARCH//TODO
+return_ ::= RETURN file_name_ [INTO identifier_] at_end_ [END-READ]
+rewrite_ ::= REWRITE identifier_ [FROM identifier_] [[WITH] UNLOCK ] invalid_key_clause_ [END-REWRITE]
+search_ ::= SEARCH (identifier_ search_varying_|ALL  identifier_ search_all_) [END-SEARCH]
 set_ ::= SET (identifier_|ADDRESS OF identifier_)+ (UP [BY]|DOWN [BY]|TO) (ON|OFF|TRUE|identifier_or_literal_|ADDRESS OF identifier_|NULL|NULLS)
-sort_ ::= SORT//TODO
-start_ ::= START//TODO
-startbackup_ ::= STARTBACKUP//TODO
+sort_ ::= SORT file_name_ key_specifier_+ [[WITH] DUPLICATES [IN] [ORDER]] [collating_sequence_] sort_input_specifier_ sort_output_specifier_
+start_ ::= START file_name_ key_phrase_  [(APPROXIMATE|GENERIC)] [time_limit_] invalid_key_clause_ [END-START]
+startbackup_ ::= STARTBACKUP identifier_or_literal_ identifier_or_literal_
 stop_ ::= STOP (RUN|identifier_or_literal_)
-string_ ::= STRING {identifier_or_literal_+ DELIMITED [BY] (SIZE|identifier_or_literal_)}+ INTO [[WITH] POINTER identifier_] identifier_ overflow_clause_ [END-STRING]
-subtract_ ::= SUBTRACT//TODO
-unlockfile_ ::= UNLOCKFILE//TODO
-unlockrecord_ ::= UNLOCKRECORD//TODO
-unstring_ ::= UNSTRING//TODO
+string_ ::= STRING {identifier_or_literal_+ DELIMITED [BY] (SIZE|identifier_or_literal_)}+ INTO identifier_ [[WITH] POINTER identifier_] overflow_clause_ [END-STRING]
+subtract_ ::= SUBTRACT [CORR|CORRESPONDING] identifier_or_literal_+ [FROM (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-SUBTRACT]
+unlockfile_ ::= UNLOCKFILE file_name_
+unlockrecord_ ::= UNLOCKRECORD file_name_
+unstring_ ::= UNSTRING identifier_ [DELIMITED [BY] [ALL] identifier_or_literal_ ([OR [ALL] identifier_or_literal_])+] INTO unstring_result_+ [[WITH] POINTER identifier_] [TALLYING [IN] identifier_] overflow_clause_ [END-UNSTRING]
 use_ ::= USE [GLOBAL] AFTER [STANDARD] (EXCEPTION|ERROR) PROCEDURE [ON] (file_name_|INPUT|OUTPUT|I-O|EXTEND) DOT
-write_ ::= WRITE//TODO
+write_ ::= WRITE identifier_ [FROM identifier_] [advancing_clause_ end_of_page_clause_] invalid_key_clause_ [END-WRITE]
 
 //*******************************
 //Rules common to multiple procedure division verbs or sub-rules
@@ -307,38 +307,35 @@ expression_ ::= (expression_arithmetic_|expression_conditional_)
 
 private expression_arithmetic_ ::= expression_times_div_ { ( PLUS_SIGN_ | MINUS_SIGN_ ) expression_times_div_ }*
 private expression_times_div_ ::= expression_power_ { ( TIMES_SIGN_ | DIVIDE_SIGN_ ) expression_power_ }*
-private expression_power_ ::=	[ ( MINUS_SIGN_ | PLUS_SIGN_ ) ] expression_basis { POWER_SIGN_ expression_basis }*
-private expression_basis	::=	( identifier_or_literal_ | OPAREN_SIGN_ expression_arithmetic_ CPAREN_SIGN_ )
+private expression_power_ ::= [ ( MINUS_SIGN_ | PLUS_SIGN_ ) ] expression_basis { POWER_SIGN_ expression_basis }*
+private expression_basis ::= ( identifier_or_literal_ | OPAREN_SIGN_ expression_arithmetic_ CPAREN_SIGN_ )
 
 expression_conditional_ ::= condition_
-condition_ ::= combinable_condition_ { ( AND | OR) combinable_condition_ }*
-private combinable_condition_ ::= ( simple_condition_| negated_simple_conditions_| abbreviated_combined_relation_conditions_ )
-private simple_condition_ ::= (relation_condition_|class_condition_|condition_name_condition_|sign_condition_
-|switch_status_condition_|OPAREN_SIGN_ condition_ CPAREN_SIGN_)
-private class_condition_ ::= identifier_ [IS] [NOT] (NUMERIC|ALPHABETIC|ALPHABETIC-LOWER|ALPHABETIC-UPPER|COBOLWORD)
-private condition_name_condition_ ::= identifier_
-private relation_condition_	::=	condition_operand_ relational_operator_ condition_operand_
-private condition_operand_ ::= (identifier_or_literal_|expression_arithmetic_|NULL|NULLS|ADDRESS OF identifier_)
-private relational_operator_ ::= [NOT]
-(GREATER|LESS|EQUAL|GREATER_SIGN_|LESS_SIGN_|EQUAL_SIGN_|GREATER_EQUAL_SIGN_|LESS_EQUAL_SIGN_)
-[(THAN|TO)] [OR EUQAL [TO]]
-private sign_condition_	::= expression_arithmetic_ [IS] [NOT] (POSITIVE|NEGATIVE|ZERO)
-private switch_status_condition_	::=	identifier_
-private negated_simple_conditions_	::=	NOT condition_
-private abbreviated_combined_relation_conditions_	::=	relation_condition_ abbreviation_rest_
-private abbreviation_rest_	::=	{ (AND|OR) [NOT] [ relational_operator_ ] abbreviation_leaf_ }+
-private abbreviation_leaf_	::=	( condition_operand_ | OPAREN_SIGN_ condition_operand_ abbreviation_rest_ CPAREN_SIGN_ )
+condition_ ::= combinable_condition_ { (AND|OR) combinable_condition_ }*
+private combinable_condition_ ::= [NOT](simple_condition_ | parenthesis_condition_)
+private simple_condition_ ::= condition_operand_ [{class_condition_|sign_condition_|relation_condition_}]
+private parenthesis_condition_ ::= OPAREN_SIGN_ condition_ CPAREN_SIGN_
+private class_condition_ ::=  [IS] [NOT] (NUMERIC|ALPHABETIC|ALPHABETIC-LOWER|ALPHABETIC-UPPER|COBOLWORD)
+private relation_condition_	::=	relational_operator_ condition_operand_
+private condition_operand_ ::= (NULL|NULLS|ADDRESS OF identifier_|expression_arithmetic_)
+private relational_operator_ ::= [IS] [NOT] (equals_|greater_|less_)
+private equals_ ::= (EQUAL [TO]|EQUAL_SIGN_)
+private greater_ ::= (GREATER than_or_equal_|GREATER_EQUAL_SIGN_|GREATER_SIGN_)
+private less_ ::= (LESS than_or_equal_|LESS_EQUAL_SIGN_|LESS_SIGN_)
+private than_or_equal_ ::= [THAN] [OR EQUAL [TO]]
+private sign_condition_	::=  [IS] [NOT] (POSITIVE|NEGATIVE|ZERO)
 
 private tallying_ ::= TALLYING {identifier_ FOR (CHARACTERS position_*|(ALL|LEADING) identifier_or_literal_ position_* )+}+
 private replacing_::= REPLACING (CHARACTERS BY identifier_or_literal_ position_*|(ALL|LEADING|FIRST) {identifier_or_literal_ BY identifier_or_literal_ position_*}+)
 private converting_ ::= CONVERTING identifier_or_literal_ TO identifier_or_literal_ position_*
 private position_ ::= (BEFORE|AFTER) [INITIAL] identifier_or_literal_
 
-private on_exception_ ::= [ON] (EXCEPTION|OVERFLOW) instruction_
-private on_not_on_ ::= on_exception_ [NOT [ON] EXCEPTION instruction_+]
-private invalid_key_clause_ ::= [INVALID [KEY]  instruction_] [NOT INVALID [KEY] instruction_]
-private size_error_clause_ ::= [[ON] SIZE ERROR instruction_] [NOT [ON] SIZE ERROR instruction_]
-private overflow_clause_ ::= [[ON] OVERFLOW instruction_] [NOT [ON] OVERFLOW instruction_]
+private on_exception_ ::= [ON] (EXCEPTION|OVERFLOW) instruction_+
+private on_not_on_ ::= on_exception_+ [NOT [ON] EXCEPTION instruction_+]
+private invalid_key_clause_ ::= [INVALID [KEY]  instruction_+] [NOT INVALID [KEY] instruction_+]
+private size_error_clause_ ::= [[ON] SIZE ERROR instruction_+] [NOT [ON] SIZE ERROR instruction_+]
+private overflow_clause_ ::= [[ON] OVERFLOW instruction_+] [NOT [ON] OVERFLOW instruction_+]
+private at_end_ ::= [[AT] END instruction_+] [NOT [AT] END instruction_+]
 private using_ ::= USING identifier_+
 private using2_ ::= USING ([ [BY] (REFERENCE|CONTENT|VALUE) ] identifier_+ )+
 private using3_ ::= USING (identifier_or_literal_|OPAREN_SIGN_ expression_arithmetic_ CPAREN_SIGN_|OMITTED)+
@@ -353,16 +350,77 @@ private extend_file_spec_ ::= io_file_spec_
 
 private perform_procedure_ ::= procedure_group_ [test_site_] [perform_repetition_]
 private perform_instructions_ ::= [test_site_] [perform_repetition_] instruction_+ END-PERFORM
-private perform_repetition_ ::= (identifier_or_literal_ TIMES|UNTIL condition_|varying_phrase_ after_phrase_+ )
+private perform_repetition_ ::= (identifier_or_literal_ TIMES|UNTIL condition_|varying_phrase_ after_phrase_* )
 private procedure_group_ ::= paragraph_name_ [(THROUGH|THRU) paragraph_name_]
 private test_site_ ::= [WITH] TEST (BEFORE|AFTER)
-private varying_phrase_ ::= VARYING literal_ FROM identifier_or_literal_ BY identifier_or_literal_ UNTIL condition_
-private after_phrase_ ::= AFTER literal_ FROM identifier_or_literal_ BY identifier_or_literal_ UNTIL condition_
+private varying_phrase_ ::= VARYING identifier_ FROM identifier_or_literal_ BY identifier_or_literal_ UNTIL condition_
+private after_phrase_ ::= AFTER identifier_ FROM identifier_or_literal_ BY identifier_or_literal_ UNTIL condition_
+
+private search_all_ ::= [[AT] END instruction_] WHEN search_match_ (AND search_match_)* (instruction_|NEXT SENTENCE)
+private search_match_ ::= identifier_ [[IS] (EQUAL_SIGN_|EQUAL [TO]) expression_arithmetic_]
+private search_varying_ ::= VARYING identifier_ [[AT] END instruction_] {WHEN condition_ (instruction_|NEXT SENTENCE)}+
+
+private sort_input_specifier_ ::= (USING file_name_+|INPUT PROCEDURE [IS] procedure_group_)
+private sort_output_specifier_ ::= (GIVING file_name_+|OUTPUT PROCEDURE [IS] procedure_group_)
+
+private time_limit_ ::= TIME LIMIT identifier_or_literal_
+private key_phrase_ ::= KEY [IS]  key_relationship_ identifier_ [[(BEFORE|AFTER)] POSITION identifier_]
+private key_relationship_ ::= {GREATER [THAN][OR EQUAL [TO]]|[NOT] (LESS [THAN]|LESS_SIGN_)|EQUAL [TO]|GREATER_SIGN_||EQUAL_SIGN_|GREATER_EQUAL_SIGN_}
+
+private unstring_result_ ::= identifier_ [DELIMITER [IN] identifier_] [COUNT [IN] identifier_]
+private advancing_clause_ ::= (AFTER|BEFORE) [ADVANCING] (PAGE|identifier_or_literal_ [(LINE|LINES)])
+private end_of_page_clause_ ::= [[AT] (EOP|END-OF-PAGE) instruction_][[NOT][AT] (EOP|END-OF-PAGE) instruction_]
+
 //*******************************
 //Intrisic functions
 //*******************************
-//TODO
-intrisic_function_ ::= FUNCTION COBOLWORD OPAREN_SIGN_ identifier_or_literal_* CPAREN_SIGN_
+intrisic_function_ ::= FUNCTION COBOLWORD [OPAREN_SIGN_ identifier_or_literal_+ CPAREN_SIGN_]
+/** function names are not reserved words... TODO see how to handle this in way that it does not conflict with identifiers
+intrisic_function_names_ ::= (CHAR
+|CURRENT-DATE
+|LOWER-CASE
+|REVERSE
+|UPPER-CASE
+|WHEN-COMPILED
+|ACOS
+|ANNUITY
+|ASIN
+|ATAN
+|COS
+|LOG
+|LOG10
+|MEAN
+|MEDIAN
+|MIDRANGE
+|NUMVAL
+|NUMVAL-C
+|PRESENT-VALUE
+|RANDOM
+|REM
+|SIN
+|SQRT
+|STANDARD-DEVIATION
+|TAN
+|VARIANCE
+|DATE-OF-INTEGER
+|DAY-OF-INTEGER
+|FACTORIAL
+|INTEGER
+|INTEGER-OF-DATE
+|INTEGER-OF-DAY
+|INTEGER-PART
+|LENGTH
+|MOD
+|ORD
+|ORD-MAX
+|ORD-MIN
+|TEST-NUMVAL
+|TEST-NUMVAL-C
+|MAX
+|MIN
+|RANGE
+|SUM)
+*/
 
 //*******************************
 //General tokens
@@ -375,4 +433,4 @@ cobolword_or_literal_ ::= (COBOLWORD|literal_)
 identifier_ ::= COBOLWORD parent_identifier_* [subscript_]
 identifier_or_literal_ ::= (identifier_|literal_)
 parent_identifier_ ::= (OF|IN) COBOLWORD
-subscript_ ::= OPAREN_SIGN_ identifier_or_literal_ [COLON_SIGN_ identifier_or_literal_] CPAREN_SIGN_
+subscript_ ::= OPAREN_SIGN_ expression_arithmetic_ [COLON_SIGN_ [expression_arithmetic_]] CPAREN_SIGN_
