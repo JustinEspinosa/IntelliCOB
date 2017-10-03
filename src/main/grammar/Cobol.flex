@@ -31,7 +31,7 @@ PREPROCESSOR_INDICATOR="?"
 PAGE_INDICATOR="/"
 COMMENT_ENTRY=.+
 PREPROCESSOR=.+
-COBOLWORD=[a-zA-Z][a-zA-Z0-9-]*
+COBOLWORD=[a-zA-Z0-9][a-zA-Z0-9-]*
 INTEGER_=[\+\-]?[0-9]+
 NUMBER_=[\+\-]?[0-9]+\.[0-9]+
 DOUBLE_EQUAL="=="
@@ -128,7 +128,7 @@ DEFINE=\={COBOLWORD}
 
 <STRING_STATE>
 {
- \"          { state(codeState); if(returnTokens){return STRING;} }
+ \"          { state(codeState); if(returnTokens){return STRING_LITERAL;} }
  .           { }
 }
 
@@ -184,11 +184,11 @@ DEFINE=\={COBOLWORD}
  {GREATER_EQUAL_SIGN_}      { return GREATER_EQUAL_SIGN_; }
  {LESS_EQUAL_SIGN_}         { return LESS_EQUAL_SIGN_; }
  {COLON_SIGN_}              { return COLON_SIGN_; }
- {COBOLWORD}                { return cobolWordToken(); }
  {DEFINE}                   { return DEFINE; }
  {GUARDIAN_FILE}            { return GUARDIAN_FILE; }
  {INTEGER_}                 { return INTEGER_; }
  {NUMBER_}                  { return NUMBER_; }
+ {COBOLWORD}                { return cobolWordToken(); }
  {DOT}                      { return DOT; }
  {CRLF}                     { state(YYINITIAL); return WHITE_SPACE; }
  {WHITE_SPACE}              { return WHITE_SPACE;  }

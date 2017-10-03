@@ -10,7 +10,7 @@ public class CobolTokenTypeFactory {
     private static final Map<String, IElementType> KNOWN_TOKENS = new TreeMap<>();
 
     private static final Set<String> NOT_KEY_WORD = new TreeSet<>(Arrays.asList(
-            "COBOLWORD", "COMMENT", "DOT", "COMMENT_ENTRY", "COMPUTER_NAME", "STRING", "INTEGER_",
+            "COBOLWORD", "COMMENT", "DOT", "COMMENT_ENTRY", "COMPUTER_NAME", "STRING_LITERAL", "INTEGER_",
             "OBJECT_COMPUTER_NAME", "PICTURE_STRING", "PSEUDOTEXT", "NUMBER_", "CODE_INDICATOR", "COMMENT_INDICATOR",
             "PAGE_INDICATOR", "PREPROCESSOR_INDICATOR", "PREPROCESSOR", "COPY_PREPROCESSOR", "REPLACE_PREPROCESSOR",
             "GUARDIAN_FILE"

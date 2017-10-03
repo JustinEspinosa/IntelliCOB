@@ -36,7 +36,7 @@ public class CobolSyntaxHighlighter extends SyntaxHighlighterBase {
         addColorData(DOT, DOT_KEY);
         addColorData(COMMENT, COMMENT_KEY);
         addColorData(COMMENT_INDICATOR, COMMENT_KEY);
-        addColorData(STRING, STRING_KEY);
+        addColorData(STRING_LITERAL, STRING_KEY);
         addColorData(PICTURE_STRING, STRING_KEY);
         addColorData(INTEGER_, NUMBER_KEY);
         addColorData(NUMBER_, NUMBER_KEY);
