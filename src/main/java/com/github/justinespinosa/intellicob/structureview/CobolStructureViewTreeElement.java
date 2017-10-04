@@ -1,80 +1,30 @@
 package com.github.justinespinosa.intellicob.structureview;
 
-import com.github.justinespinosa.intellicob.psi.CobolFile;
-import com.github.justinespinosa.intellicob.psi.impl.*;
-import com.github.justinespinosa.intellicob.resources.CobolIcons;
 import com.intellij.ide.structureView.StructureViewTreeElement;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.navigation.ItemPresentation;
+import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+
+import static com.github.justinespinosa.intellicob.structureview.CobolStructureViewConstants.ALLOWED_ELEMENTS;
+import static com.github.justinespinosa.intellicob.structureview.CobolStructureViewConstants.DEFAULT_DESCRIPTOR;
 
 public class CobolStructureViewTreeElement implements StructureViewTreeElement {
-
-    private static Map<Class<?>, Function<? extends PsiElement, String>> ALLOWED_ELEMENTS = new HashMap<>();
-
-    static {
-        ALLOWED_ELEMENTS.put(CobolFile.class, (PsiFile psiElement) -> psiElement.getName());
-        ALLOWED_ELEMENTS.put(CobolCobolProgram_Impl.class, (CobolCobolProgram_Impl psiElement) -> psiElement.getIdentificationDivision_().getProgramId_().getProgramIdName_().getText());
-        ALLOWED_ELEMENTS.put(CobolIdentificationDivision_Impl.class, psiElement -> "IDENTIFICATION");
-        ALLOWED_ELEMENTS.put(CobolEnvironmentDivision_Impl.class, psiElement -> "ENVIRONMENT");
-        ALLOWED_ELEMENTS.put(CobolDataDivision_Impl.class, psiElement -> "DATA");
-        ALLOWED_ELEMENTS.put(CobolFileSection_Impl.class, psiElement -> "FILE");
-        ALLOWED_ELEMENTS.put(CobolWorkingStorageSection_Impl.class, psiElement -> "WORKING-STORAGE");
-        ALLOWED_ELEMENTS.put(CobolExtendedStorageSection_Impl.class, psiElement -> "EXTENDED-STORAGE");
-        ALLOWED_ELEMENTS.put(CobolLinkageSection_Impl.class, psiElement -> "LINKAGE");
-        ALLOWED_ELEMENTS.put(CobolDataItem_Impl.class, (CobolDataItem_Impl psiElement) -> psiElement.getDataItemName_().getText());
-        ALLOWED_ELEMENTS.put(CobolProcedureDivision_Impl.class, psiElement -> "PROCEDURE");
-        ALLOWED_ELEMENTS.put(CobolParagraph_Impl.class, (CobolParagraph_Impl psiElement) -> psiElement.getParagraphName_().getText());
-        ALLOWED_ELEMENTS.put(CobolSection_Impl.class, (CobolSection_Impl psiElement) -> psiElement.getParagraphName_().getText());
-    }
-
     private final PsiElement psiElement;
     private final ItemPresentation presentation;
 
-
     public CobolStructureViewTreeElement(PsiElement psiElement) {
         this.psiElement = psiElement;
-        this.presentation = new ItemPresentation() {
-
-            @Nullable
-            @Override
-            public String getPresentableText() {
-                return CobolStructureViewTreeElement.this.getPresentableText();
-            }
-
-            @Nullable
-            @Override
-            public String getLocationString() {
-                return "";
-            }
-
-            @Nullable
-            @Override
-            public Icon getIcon(boolean unused) {
-                return CobolIcons.STRUCTURE;
-            }
-        };
-
+        presentation = new CobolItemPresentation(psiElement, ALLOWED_ELEMENTS.getOrDefault(psiElement.getClass(), DEFAULT_DESCRIPTOR));
     }
 
     private static boolean includedInStructureView(PsiElement element) {
         return ALLOWED_ELEMENTS.keySet().contains(element.getClass());
-    }
-
-    private String getPresentableText() {
-        Function<PsiElement, String> textFunc = (Function<PsiElement, String>) ALLOWED_ELEMENTS
-                .getOrDefault(psiElement.getClass(), psiElement1 -> "<UNKNOWN>");
-
-        return textFunc.apply(psiElement);
     }
 
     @Override
@@ -99,16 +49,49 @@ public class CobolStructureViewTreeElement implements StructureViewTreeElement {
 
     @Override
     public void navigate(boolean requestFocus) {
-
+        if (psiElement instanceof NavigationItem) {
+            ((NavigationItem) psiElement).navigate(requestFocus);
+        }
     }
 
     @Override
     public boolean canNavigate() {
-        return false;
+        return psiElement instanceof NavigationItem &&
+                ((NavigationItem) psiElement).canNavigate();
+
     }
 
     @Override
     public boolean canNavigateToSource() {
-        return false;
+        return psiElement instanceof NavigationItem &&
+                ((NavigationItem) psiElement).canNavigateToSource();
+    }
+
+    private static class CobolItemPresentation implements ItemPresentation {
+        private PsiElement psiElement;
+        private CobolItemDescriptor descriptor;
+
+        private CobolItemPresentation(PsiElement psiElement, CobolItemDescriptor descriptor) {
+            this.psiElement = psiElement;
+            this.descriptor = descriptor;
+        }
+
+        @Nullable
+        @Override
+        public String getPresentableText() {
+            return descriptor.getPresentableText(psiElement);
+        }
+
+        @Nullable
+        @Override
+        public String getLocationString() {
+            return "";
+        }
+
+        @Nullable
+        @Override
+        public Icon getIcon(boolean unused) {
+            return descriptor.getIcon(unused);
+        }
     }
 }

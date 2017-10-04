@@ -13,6 +13,12 @@
   tokenTypeClass="com.github.justinespinosa.intellicob.psi.CobolTokenType"
   tokenTypeFactory="CobolTokenTypeFactory.createTokenType"
 
+  extends("paragraph_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
+  extends("section_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
+  extends("declaratives_section_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
+
+  extends("*") ="com.github.justinespinosa.intellicob.psi.CobolPsiElementImpl"
+
 }
 
 //GRAMMAR of HP NonStop COBOL for TNS/E
