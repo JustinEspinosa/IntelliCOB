@@ -29,6 +29,9 @@
                                        implementationClass="com.github.justinespinosa.intellicob.highlight.CobolSyntaxHighlighterFactory"/>
         <lang.psiStructureViewFactory language="Cobol"
                                       implementationClass="com.github.justinespinosa.intellicob.structureview.CobolStructureViewFactory"/>
+
+        <lang.namesValidator language="Cobol"
+                             implementationClass="com.github.justinespinosa.intellicob.psi.CobolNamesValidator"/>
     </extensions>
 
     <actions>

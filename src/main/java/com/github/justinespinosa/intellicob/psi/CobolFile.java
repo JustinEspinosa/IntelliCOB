@@ -22,7 +22,7 @@ public class CobolFile extends PsiFileBase {
 
     @Override
     public String toString() {
-        return "Simple File";
+        return "Cobol File";
     }
 
     @Override

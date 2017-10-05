@@ -1,5 +1,6 @@
 {
   parserClass="com.github.justinespinosa.intellicob.parser.CobolParser"
+  parserUtilClass="com.github.justinespinosa.intellicob.parser.CobolParserUtil"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
@@ -16,8 +17,7 @@
   extends("paragraph_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
   extends("section_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
   extends("declaratives_section_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
-
-  extends("*") ="com.github.justinespinosa.intellicob.psi.CobolPsiElementImpl"
+  extends("paragraph_name_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphNameElement"
 
 }
 
@@ -209,7 +209,10 @@ private code_set_ ::= CODE-SET [IS] COBOLWORD
 private report2_ ::= (REPORT [IS]|REPORTS [ARE]) COBOLWORD
 
 //################
-data_item_ ::= INTEGER_ data_item_name_ [data_type_description_] DOT
+data_item_ ::= data_item_level_ data_item_rest_ {data_item_sub_level_ data_item_rest_}*
+private data_item_rest_ ::= data_item_name_ [data_type_description_] DOT
+external data_item_level_ ::= variableLevel
+external data_item_sub_level_ ::= lowerVariableLevel
 data_item_name_ ::= (COBOLWORD|FILLER)
 data_type_description_ ::= (redefines_
  |external2_
