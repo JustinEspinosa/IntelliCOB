@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import org.jetbrains.annotations.NotNull;
 
-import static com.github.justinespinosa.intellicob.psi.PsiUtil.createParagraph;
+import static com.github.justinespinosa.intellicob.psi.PsiUtil.createParagraphName;
 
 public class CobolParagraphElement extends ASTWrapperPsiElement implements PsiNamedElement {
     public CobolParagraphElement(@NotNull ASTNode node) {
@@ -16,13 +16,16 @@ public class CobolParagraphElement extends ASTWrapperPsiElement implements PsiNa
     @Override
     public String getName() {
         ASTNode keyNode = getNode().findChildByType(CobolTypes.PARAGRAPH_NAME_);
+        if (keyNode == null) {
+            return "";
+        }
         return keyNode.getText();
     }
 
     @Override
     public PsiElement setName(String newName) {
         ASTNode keyNode = getNode().findChildByType(CobolTypes.PARAGRAPH_NAME_);
-        ASTNode newKeyNode = createParagraph(getProject(), newName);
+        ASTNode newKeyNode = createParagraphName(getProject(), newName);
         getNode().replaceChild(keyNode, newKeyNode);
         return this;
     }

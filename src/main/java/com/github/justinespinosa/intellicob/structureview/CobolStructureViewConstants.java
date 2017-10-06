@@ -1,6 +1,9 @@
 package com.github.justinespinosa.intellicob.structureview;
 
-import com.github.justinespinosa.intellicob.psi.*;
+import com.github.justinespinosa.intellicob.psi.CobolCobolProgram_;
+import com.github.justinespinosa.intellicob.psi.CobolDataItemElement;
+import com.github.justinespinosa.intellicob.psi.CobolFile;
+import com.github.justinespinosa.intellicob.psi.CobolParagraphElement;
 import com.github.justinespinosa.intellicob.psi.impl.*;
 import com.github.justinespinosa.intellicob.resources.CobolIcons;
 import com.intellij.psi.PsiFile;
@@ -22,11 +25,15 @@ public class CobolStructureViewConstants {
         ALLOWED_ELEMENTS.put(CobolWorkingStorageSection_Impl.class, new CobolItemDescriptor(CobolIcons.SECTION, psiElement -> "WORKING-STORAGE"));
         ALLOWED_ELEMENTS.put(CobolExtendedStorageSection_Impl.class, new CobolItemDescriptor(CobolIcons.SECTION, psiElement -> "EXTENDED-STORAGE"));
         ALLOWED_ELEMENTS.put(CobolLinkageSection_Impl.class, new CobolItemDescriptor(CobolIcons.SECTION, psiElement -> "LINKAGE"));
-        ALLOWED_ELEMENTS.put(CobolDataItem_Impl.class, new CobolItemDescriptor(CobolIcons.VARIABLE, (CobolDataItem_ psiElement) -> psiElement.getDataItemName_().getText()));
+        ALLOWED_ELEMENTS.put(CobolDataItem66_Impl.class, new CobolItemDescriptor(CobolIcons.VARIABLE, (CobolDataItemElement psiElement) -> psiElement.getName()));
+        ALLOWED_ELEMENTS.put(CobolDataItem77_Impl.class, new CobolItemDescriptor(CobolIcons.VARIABLE, (CobolDataItemElement psiElement) -> psiElement.getName()));
+        ALLOWED_ELEMENTS.put(CobolDataItem88_Impl.class, new CobolItemDescriptor(CobolIcons.VARIABLE, (CobolDataItemElement psiElement) -> psiElement.getName()));
+        ALLOWED_ELEMENTS.put(CobolDataItemRecord_Impl.class, new CobolItemDescriptor(CobolIcons.VARIABLE, (CobolDataItemElement psiElement) -> psiElement.getName()));
+        ALLOWED_ELEMENTS.put(CobolDataItemChildRecord_Impl.class, new CobolItemDescriptor(CobolIcons.VARIABLE, (CobolDataItemElement psiElement) -> psiElement.getName()));
         ALLOWED_ELEMENTS.put(CobolProcedureDivision_Impl.class, new CobolItemDescriptor(CobolIcons.DIVISION, psiElement -> "PROCEDURE"));
-        ALLOWED_ELEMENTS.put(CobolParagraph_Impl.class, new CobolItemDescriptor(CobolIcons.PARAGRAPH, (CobolParagraph_ psiElement) -> psiElement.getParagraphName_().getText()));
-        ALLOWED_ELEMENTS.put(CobolSection_Impl.class, new CobolItemDescriptor(CobolIcons.SECTION, (CobolSection_ psiElement) -> psiElement.getParagraphName_().getText()));
-        ALLOWED_ELEMENTS.put(CobolDeclarativesSection_Impl.class, new CobolItemDescriptor(CobolIcons.SECTION, (CobolDeclarativesSection_Impl psiElement) -> psiElement.getParagraphName_().getText()));
+        ALLOWED_ELEMENTS.put(CobolParagraph_Impl.class, new CobolItemDescriptor(CobolIcons.PARAGRAPH, (CobolParagraphElement psiElement) -> psiElement.getName()));
+        ALLOWED_ELEMENTS.put(CobolSection_Impl.class, new CobolItemDescriptor(CobolIcons.SECTION, (CobolParagraphElement psiElement) -> psiElement.getName()));
+        ALLOWED_ELEMENTS.put(CobolDeclarativesSection_Impl.class, new CobolItemDescriptor(CobolIcons.SECTION, (CobolParagraphElement psiElement) -> psiElement.getName()));
         ALLOWED_ELEMENTS.put(CobolDeclaratives_Impl.class, new CobolItemDescriptor(CobolIcons.DIVISION, psiElement -> "DECLARATIVES"));
     }
 }

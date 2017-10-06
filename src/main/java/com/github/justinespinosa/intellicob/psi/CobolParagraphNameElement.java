@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static com.github.justinespinosa.intellicob.psi.PsiUtil.createParagraph;
+import static com.github.justinespinosa.intellicob.psi.PsiUtil.createParagraphName;
 import static com.github.justinespinosa.intellicob.psi.PsiUtil.findElements;
 
 public class CobolParagraphNameElement extends ASTWrapperPsiElement implements PsiReference {
@@ -54,7 +54,7 @@ public class CobolParagraphNameElement extends ASTWrapperPsiElement implements P
     public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
 
         ASTNode wordNode = getNode().findChildByType(CobolTypes.COBOLWORD);
-        ASTNode newParagraph = createParagraph(getProject(), newElementName);
+        ASTNode newParagraph = createParagraphName(getProject(), newElementName);
         ASTNode newWordNode = newParagraph.findChildByType(CobolTypes.COBOLWORD);
         getNode().replaceChild(wordNode, newWordNode);
 
@@ -69,7 +69,7 @@ public class CobolParagraphNameElement extends ASTWrapperPsiElement implements P
     @Override
     public boolean isReferenceTo(PsiElement element) {
         return element instanceof CobolParagraphElement &&
-                ((CobolParagraphElement) element).getName().toUpperCase().equals(getText().toUpperCase());
+                ((CobolParagraphElement) element).getName().equalsIgnoreCase(getText());
     }
 
     @NotNull

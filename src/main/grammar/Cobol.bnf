@@ -14,10 +14,18 @@
   tokenTypeClass="com.github.justinespinosa.intellicob.psi.CobolTokenType"
   tokenTypeFactory="CobolTokenTypeFactory.createTokenType"
 
+  generateTokenAccessors=true
+
   extends("paragraph_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
   extends("section_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
   extends("declaratives_section_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphElement"
   extends("paragraph_name_") ="com.github.justinespinosa.intellicob.psi.CobolParagraphNameElement"
+  extends("data_item_66_") ="com.github.justinespinosa.intellicob.psi.CobolDataItemElement"
+  extends("data_item_77_") ="com.github.justinespinosa.intellicob.psi.CobolDataItemElement"
+  extends("data_item_88_") ="com.github.justinespinosa.intellicob.psi.CobolDataItemElement"
+  extends("data_item_record_") ="com.github.justinespinosa.intellicob.psi.CobolDataItemElement"
+  extends("data_item_child_record_") ="com.github.justinespinosa.intellicob.psi.CobolDataItemElement"
+  extends("identifier_part_") ="com.github.justinespinosa.intellicob.psi.CobolIdentifierElement"
 
 }
 
@@ -209,10 +217,18 @@ private code_set_ ::= CODE-SET [IS] COBOLWORD
 private report2_ ::= (REPORT [IS]|REPORTS [ARE]) COBOLWORD
 
 //################
-data_item_ ::= data_item_level_ data_item_rest_ {data_item_sub_level_ data_item_rest_}*
+private data_item_ ::= (data_item_record_|data_item_77_|data_item_88_|data_item_66_)
+data_item_77_ ::= <<variableLevel77>> data_item_rest_
+data_item_88_ ::= <<variableLevel88>> data_item_rest_
+//TODO really support 66 rename items
+data_item_66_ ::= <<variableLevel66>> data_item_rest_
+data_item_record_ ::= root_variable_level_ data_item_rest_ data_child_item_*
+data_item_child_record_ ::= child_variable_level_ data_item_rest_ data_child_item_*
+private data_child_item_ ::=  (data_item_88_|data_item_child_record_)
 private data_item_rest_ ::= data_item_name_ [data_type_description_] DOT
-external data_item_level_ ::= variableLevel
-external data_item_sub_level_ ::= lowerVariableLevel
+root_variable_level_ ::= <<rootVariableLevel>>
+child_variable_level_ ::= <<childVariableLevel>>
+
 data_item_name_ ::= (COBOLWORD|FILLER)
 data_type_description_ ::= (redefines_
  |external2_
@@ -439,7 +455,8 @@ literal_ ::= [ALL] literal_values_
 literal_values_ ::= (INTEGER_|NUMBER_|STRING_LITERAL|ZERO|ZEROS|ZEROES|SPACE|SPACES|
 HIGH_VALUE|HIGH_VALUES|LOW_VALUE|LOW_VALUES|QUOTE|QUOTES|intrisic_function_)
 cobolword_or_literal_ ::= (COBOLWORD|literal_)
-identifier_ ::= COBOLWORD parent_identifier_* [subscript_]
 identifier_or_literal_ ::= (identifier_|literal_)
-parent_identifier_ ::= (OF|IN) COBOLWORD
+identifier_ ::= identifier_part_ {identifier_separator_ identifier_part_}* [subscript_]
+identifier_part_ ::= COBOLWORD
+identifier_separator_ ::= (OF|IN)
 subscript_ ::= OPAREN_SIGN_ expression_arithmetic_ [COLON_SIGN_ [expression_arithmetic_]] CPAREN_SIGN_

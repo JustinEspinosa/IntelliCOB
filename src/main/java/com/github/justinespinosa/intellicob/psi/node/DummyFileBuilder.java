@@ -15,7 +15,39 @@ public class DummyFileBuilder {
     private static final String PROGRAMIDNAME = " prg.";
     private static final String WORKING_STORAGE = " working-storage section.";
     private static final String PARAGRAPH = " para. continue.";
+    private boolean hasProgramId = false;
+    private boolean hasParagraph = false;
+    private CodeElement program = new CodeElement("");
+    private CodeElement identification = new CodeElement(IDENTIFICATION, program);
+    private CodeElement programId = new CodeElement(PROGRAMID, identification);
+    private CodeElement data = new CodeElement(DATA, program);
+    private CodeElement workingStorage = new CodeElement(WORKING_STORAGE, data);
+    private CodeElement procedure = new CodeElement(PROCEDURE, program);
 
+    public DummyFileBuilder withParagraphName(String name) {
+        new CodeElement(" " + name + ". continue.", procedure);
+        hasParagraph = true;
+        return this;
+    }
+
+    public DummyFileBuilder withDataItem(String name) {
+        new CodeElement(" 01 " + name + " PIC X.", workingStorage);
+        return this;
+    }
+
+    private void ensureMinimalProgram() {
+        if (!hasProgramId) {
+            new CodeElement(PROGRAMIDNAME, programId);
+        }
+        if (!hasParagraph) {
+            new CodeElement(PARAGRAPH, procedure);
+        }
+    }
+
+    public String build() {
+        ensureMinimalProgram();
+        return program.toString();
+    }
 
     public final static class CodeElement {
         private String text;
@@ -38,37 +70,5 @@ public class DummyFileBuilder {
                     .map(CodeElement::toString)
                     .collect(joining(CRLF));
         }
-    }
-
-
-    private boolean hasProgramId = false;
-    private boolean hasParagraph = false;
-
-    private CodeElement program = new CodeElement("");
-    private CodeElement identification = new CodeElement(IDENTIFICATION, program);
-    private CodeElement programId = new CodeElement(PROGRAMID, identification);
-    private CodeElement data = new CodeElement(DATA, program);
-    private CodeElement workingStorage = new CodeElement(WORKING_STORAGE, data);
-    private CodeElement procedure = new CodeElement(PROCEDURE, program);
-
-
-    public DummyFileBuilder withParagraphName(String name) {
-        new CodeElement(" " + name + ". continue.", procedure);
-        hasParagraph = true;
-        return this;
-    }
-
-    private void ensureMinimalProgram() {
-        if (!hasProgramId) {
-            new CodeElement(PROGRAMIDNAME, programId);
-        }
-        if (!hasParagraph) {
-            new CodeElement(PARAGRAPH, procedure);
-        }
-    }
-
-    public String build() {
-        ensureMinimalProgram();
-        return program.toString();
     }
 }
