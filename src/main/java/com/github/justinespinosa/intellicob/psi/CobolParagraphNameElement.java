@@ -10,10 +10,11 @@ import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
-import static com.github.justinespinosa.intellicob.psi.PsiUtil.createParagraphName;
-import static com.github.justinespinosa.intellicob.psi.PsiUtil.findElements;
+import static com.github.justinespinosa.intellicob.psi.PsiUtil.*;
 
 public class CobolParagraphNameElement extends ASTWrapperPsiElement implements PsiReference {
     public CobolParagraphNameElement(@NotNull ASTNode node) {
@@ -30,16 +31,21 @@ public class CobolParagraphNameElement extends ASTWrapperPsiElement implements P
         return new TextRange(0, getTextLength());
     }
 
-    @Nullable
-    @Override
-    public PsiElement resolve() {
+    private PsiElement[] resolve(Predicate<PsiElement> predicate) {
         TokenSet types = TokenSet.create(CobolTypes.PARAGRAPH_, CobolTypes.SECTION_, CobolTypes.DECLARATIVES_SECTION_);
 
         CobolProcedureDivision_ procedureDivision = PsiUtil.getProcedureDivision(this);
         List<PsiElement> elements = findElements(types, procedureDivision);
 
         return elements.stream()
-                .filter(this::isReferenceTo)
+                .filter(predicate)
+                .toArray(PsiElement[]::new);
+    }
+
+    @Nullable
+    @Override
+    public PsiElement resolve() {
+        return Arrays.stream(resolve(this::isReferenceTo))
                 .findFirst()
                 .orElse(null);
     }
@@ -66,6 +72,12 @@ public class CobolParagraphNameElement extends ASTWrapperPsiElement implements P
         return null;
     }
 
+    private boolean isVariantOf(PsiElement element) {
+        return element instanceof CobolParagraphElement &&
+                isCompletionVariant(((CobolParagraphElement) element).getName(), getText());
+
+    }
+
     @Override
     public boolean isReferenceTo(PsiElement element) {
         return element instanceof CobolParagraphElement &&
@@ -75,7 +87,7 @@ public class CobolParagraphNameElement extends ASTWrapperPsiElement implements P
     @NotNull
     @Override
     public Object[] getVariants() {
-        return new Object[0];
+        return resolve(this::isVariantOf);
     }
 
     @Override

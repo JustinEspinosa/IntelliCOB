@@ -6,6 +6,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 import static com.github.justinespinosa.intellicob.psi.PsiUtil.createDataItemName;
 
 public class CobolDataItemElement extends ASTWrapperPsiElement implements PsiNamedElement {
@@ -19,6 +21,13 @@ public class CobolDataItemElement extends ASTWrapperPsiElement implements PsiNam
             return (CobolDataItemElement) parent;
         }
         return null;
+    }
+
+    public CobolDataItemElement[] getChildItems() {
+        return Arrays.stream(getChildren())
+                .filter(CobolDataItemElement.class::isInstance)
+                .map(CobolDataItemElement.class::cast)
+                .toArray(CobolDataItemElement[]::new);
     }
 
     public boolean hasParentItem() {

@@ -4,13 +4,16 @@ import com.github.justinespinosa.intellicob.filetype.CobolFileType;
 import com.github.justinespinosa.intellicob.parser.CobolParserDefinition;
 import com.github.justinespinosa.intellicob.psi.node.DummyFileBuilder;
 import com.github.justinespinosa.intellicob.psi.visitor.ElementCollectorByTokenType;
+import com.intellij.codeInsight.completion.CompletionUtilCore;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.tree.TokenSet;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class PsiUtil {
 
@@ -28,13 +31,24 @@ public class PsiUtil {
         return isWhiteSpace(element) || isComment(element);
     }
 
-    public static PsiElement getNextNotSkippedSibling(PsiElement element) {
-        PsiElement returnElement = element.getNextSibling();
+    public static PsiElement getNextNotSkippedElement(PsiElement element, Function<PsiElement, PsiElement> nextElementFunction) {
+        PsiElement returnElement = nextElementFunction.apply(element);
         while (returnElement != null && isSkipped(returnElement)) {
-            returnElement = returnElement.getNextSibling();
+            returnElement = nextElementFunction.apply(returnElement);
         }
         return returnElement;
+
     }
+
+    public static PsiElement getNextNotSkippedSibling(PsiElement element) {
+        return getNextNotSkippedElement(element, PsiElement::getNextSibling);
+    }
+
+    public static PsiElement getPreviousNotSkippedSibling(PsiElement element) {
+        return getNextNotSkippedElement(element, PsiElement::getPrevSibling);
+
+    }
+
 
     public static CobolProcedureDivision_ getProcedureDivision(PsiElement element) {
         PsiElement parent = element;
@@ -98,5 +112,13 @@ public class PsiUtil {
         return (CobolFile) PsiFileFactory.getInstance(project).
                 createFileFromText("dummy", CobolFileType.INSTANCE, code);
 
+    }
+
+    public static boolean isCompletionVariant(String reference, String element) {
+        return StringUtil.startsWithIgnoreCase(reference, withoutDummyCompletionIdentifier(element));
+    }
+
+    public static String withoutDummyCompletionIdentifier(String string) {
+        return string.replace(CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED, "");
     }
 }

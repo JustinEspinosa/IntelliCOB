@@ -10,7 +10,11 @@ import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.github.justinespinosa.intellicob.psi.CobolTypes.*;
 import static com.github.justinespinosa.intellicob.psi.PsiUtil.*;
@@ -27,6 +31,32 @@ public class CobolIdentifierElement extends ASTWrapperPsiElement implements PsiR
         return dataItem.getName().equalsIgnoreCase(identifier.getIdentifierName());
     }
 
+    private static Stream<CobolDataItemElement> flatDataItem(CobolDataItemElement[] dataStream) {
+        return Arrays.stream(dataStream)
+                .flatMap(dataItemElement -> Stream.concat(flatDataItem(dataItemElement.getChildItems()), Stream.of(dataItemElement)));
+    }
+
+    private static CobolDataItemElement[] searchMatchingChildren(CobolDataItemElement[] dataItem, CobolIdentifierElement identifier) {
+        return Arrays.stream(dataItem)
+                .flatMap(item -> flatDataItem(item.getChildItems()))
+                .filter(item -> nameMatches(item, identifier))
+                .toArray(CobolDataItemElement[]::new);
+    }
+
+    private static boolean upperStructureReferenceMatches(CobolDataItemElement dataItem, CobolIdentifierElement identifier) {
+        CobolDataItemElement[] searchDataItems = new CobolDataItemElement[]{dataItem};
+        CobolIdentifierElement searchIdentifier = identifier;
+
+        while (searchIdentifier.hasChildIdentifier()) {
+            searchIdentifier = searchIdentifier.getChildIdentifier();
+            searchDataItems = searchMatchingChildren(searchDataItems, searchIdentifier);
+            if (searchDataItems.length == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static CobolDataItemElement searchMatchingParent(CobolDataItemElement dataItem, CobolIdentifierElement identifier) {
         CobolDataItemElement searchDataItem = dataItem;
 
@@ -39,11 +69,8 @@ public class CobolIdentifierElement extends ASTWrapperPsiElement implements PsiR
         return null;
     }
 
-    public static boolean structureReferenceMatches(CobolDataItemElement dataItem, CobolIdentifierElement identifier) {
-        if (!nameMatches(dataItem, identifier)) {
-            return false;
-        }
 
+    private static boolean subStructureReferenceMatches(CobolDataItemElement dataItem, CobolIdentifierElement identifier) {
         CobolDataItemElement searchDataItem = dataItem;
         CobolIdentifierElement searchIdentifier = identifier;
 
@@ -57,19 +84,41 @@ public class CobolIdentifierElement extends ASTWrapperPsiElement implements PsiR
         return true;
     }
 
-    public CobolIdentifierElement getParentIdentifier() {
-        PsiElement nextSibling = getNextNotSkippedSibling(this);
+    public static boolean structureReferenceMatches(CobolDataItemElement dataItem, CobolIdentifierElement identifier) {
+        if (!nameMatches(dataItem, identifier)) {
+            return false;
+        }
+        return subStructureReferenceMatches(dataItem, identifier);
+
+    }
+
+    private CobolIdentifierElement getNextIdentifier(Function<PsiElement, PsiElement> nextElementFunction) {
+        PsiElement nextSibling = nextElementFunction.apply(this);
         if (nextSibling instanceof CobolIdentifierSeparator_) {
-            PsiElement parent = getNextNotSkippedSibling(nextSibling);
+            PsiElement parent = nextElementFunction.apply(nextSibling);
             if (parent instanceof CobolIdentifierElement) {
                 return (CobolIdentifierElement) parent;
             }
         }
         return null;
+
     }
+
+    public CobolIdentifierElement getParentIdentifier() {
+        return getNextIdentifier(PsiUtil::getNextNotSkippedSibling);
+    }
+
+    public CobolIdentifierElement getChildIdentifier() {
+        return getNextIdentifier(PsiUtil::getPreviousNotSkippedSibling);
+    }
+
 
     public boolean hasParentIdentifier() {
         return getParentIdentifier() != null;
+    }
+
+    public boolean hasChildIdentifier() {
+        return getChildIdentifier() != null;
     }
 
     public String getIdentifierName() {
@@ -86,16 +135,21 @@ public class CobolIdentifierElement extends ASTWrapperPsiElement implements PsiR
         return new TextRange(0, getTextLength());
     }
 
-    @Nullable
-    @Override
-    public PsiElement resolve() {
+    private PsiElement[] resolve(Predicate<PsiElement> predicate) {
         TokenSet types = TokenSet.create(DATA_ITEM_66_, DATA_ITEM_77_, DATA_ITEM_88_, DATA_ITEM_RECORD_, DATA_ITEM_CHILD_RECORD_);
 
         CobolDataDivision_ dataDivision = PsiUtil.getDataDivision(PsiUtil.getProgram(this));
         List<PsiElement> elements = findElements(types, dataDivision);
 
         return elements.stream()
-                .filter(this::isReferenceTo)
+                .filter(predicate)
+                .toArray(PsiElement[]::new);
+    }
+
+    @Nullable
+    @Override
+    public PsiElement resolve() {
+        return Arrays.stream(resolve(this::isReferenceTo))
                 .findFirst()
                 .orElse(null);
     }
@@ -133,7 +187,21 @@ public class CobolIdentifierElement extends ASTWrapperPsiElement implements PsiR
     @NotNull
     @Override
     public Object[] getVariants() {
-        return new Object[0];
+        return resolve(this::isVariantOf);
+    }
+
+    public boolean isVariantOf(PsiElement element) {
+        if (element instanceof CobolDataItemElement) {
+            CobolDataItemElement dataItemElement = (CobolDataItemElement) element;
+            if (isCompletionVariant(dataItemElement.getName(), getIdentifierName())) {
+                if (upperStructureReferenceMatches(dataItemElement, this)) {
+                    return subStructureReferenceMatches(dataItemElement, this);
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
