@@ -1,7 +1,7 @@
 package com.github.justinespinosa.intellicob.psi;
 
-import com.intellij.psi.tree.IElementType;
 import com.github.justinespinosa.intellicob.language.CobolLanguage;
+import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +17,4 @@ public class CobolTokenType extends IElementType {
         return isKeyWord;
     }
 
-    @Override
-    public String toString() {
-        return "CobolTokenType." + super.toString();
-    }
 }

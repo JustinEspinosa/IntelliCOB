@@ -16,12 +16,15 @@
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
-    <!-- uncomment to enable plugin in all products
+
     <depends>com.intellij.modules.lang</depends>
-    -->
+
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
+        <!--languageInjector implementation="com.github.justinespinosa.intellicob.psi.inject.EmbeddedSqlInjector"/-->
+        <lang.psiAugmentProvider
+                implementation="com.github.justinespinosa.intellicob.psi.augment.CobolAugmentProvider"/>
         <fileTypeFactory implementation="com.github.justinespinosa.intellicob.filetype.CobolFileTypeFactory"/>
         <lang.parserDefinition language="Cobol"
                                implementationClass="com.github.justinespinosa.intellicob.parser.CobolParserDefinition"/>
@@ -32,6 +35,11 @@
 
         <lang.namesValidator language="Cobol"
                              implementationClass="com.github.justinespinosa.intellicob.psi.CobolNamesValidator"/>
+
+
+        <lang.parserDefinition language="EmbeddedSqlMp"
+                               implementationClass="com.github.justinespinosa.intellicob.parser.SqlMpParserDefinition"/>
+
     </extensions>
 
     <actions>

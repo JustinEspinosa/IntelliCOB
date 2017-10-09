@@ -1,0 +1,92 @@
+{
+  parserClass="com.github.justinespinosa.intellicob.parser.SqlMpParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="SqlMp"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.github.justinespinosa.intellicob.psi.sqlmp"
+  psiImplPackage="com.github.justinespinosa.intellicob.psi.sqlmp.impl"
+
+
+  elementTypeHolderClass="com.github.justinespinosa.intellicob.psi.sqlmp.SqlMpTypes"
+  elementTypeClass="com.github.justinespinosa.intellicob.psi.sqlmp.SqlMpElementType"
+  tokenTypeClass="com.github.justinespinosa.intellicob.psi.sqlmp.SqlMpTokenType"
+  tokenTypeFactory="SqlMpTokenTypeFactory.createTokenType"
+
+  generateTokenAccessors=true
+
+}
+
+EmbeddedSqlBlock ::= EXEC SQL SqlStatement+ END-EXEC
+
+SqlStatement ::= DmlStatement | DdlStatement | HostDirective
+
+HostDirective ::= InvokeTable | BeginDeclareSection | EndDeclareSection
+
+InvokeTable ::= INVOKE TableName
+(AS TargetHostIdentifier
+|FORMAT {C|[ANSI|TANDEM] COBOL85|PASCAL|SQL|TAL}
+|LEVEL {NUMBER|OP NUMBER COMMA NUMBER CP}
+|DATEFORMAT {DEFAULT|EUROPEAN|USA}
+|PREFIX HOST_WORD
+|SUFFIX HOST_WORD
+|NULL STRUCTURE
+|TO GUARDIAN_FILENAME [OP WORD CP] [CLEAR]
+|CHAR AS {STRING|ARRAY} )*
+
+BeginDeclareSection ::= BEGIN DECLARE SECTION
+EndDeclareSection ::= END DECLARE SECTION
+
+DmlStatement ::= SelectStatement | DeclareCursorStatement
+SelectStatement ::= SELECT [ ALL | DISTINCT ] SelectList [INTO HostList] FROM TableReferenceList
+(WHERE SearchCondition
+|HAVING SearchCondition
+|GROUP BY {ColumnList|ColumnIndexList} [ CollatePhrase ]
+|ORDER BY {ColumnList|ColumnIndexList} [ CollatePhrase ]
+[ FOR ] { BROWSE | STABLE | REPEATABLE } ACCESS
+[ IN ] { SHARE | EXCLUSIVE } MODE
+[ UNION [ ALL ] SelectStatement ]
+[ForUpdate]
+)*
+
+
+DeclareCursorStatement ::= DECALRE (Identifier|HostIdentifier) CURSOR FOR (HostIdentifier|SelectStatement [ForUpdate])
+
+DdlStatement ::= CREATE TABLE TableName
+
+private ColumnIndexList ::= NUMBER {COMMA NUMBER}*
+private ColumnList ::= Column {COMMA Column}*
+private SelectList ::= (Column|Literal) {COMMA (Column|Literal)}*
+private LiteralList ::= Literal {COMMA Literal}*
+private ExpressionList ::= ExpressionList {COMMA ExpressionList}*
+private HostList ::= HostIdentifier { COMMA HostIdentifier }*
+private ForUpdate ::=FOR UPDATE OF ColumnList
+private CollatePhrase ::= COLLATE { Collation | CHARACTER SET }
+private Collation ::= WORD
+private TableReference ::= TableName [Identifier]|JoinTable
+private JoinTable ::= TableReference (INNER|LEFT) TableReference ON SearchCondition
+private TableReferenceList ::= TableReference (COMMA TableReference)*
+private SearchCondition ::= [NOT] ParenthesisPredicate  {AND [NOT] ParenthesisPredicate|OR ParenthesisPredicate}*
+private ParenthesisPredicate ::= (Predicate|OP Predicate CP)
+private Predicate ::= (ComparisonPredicate
+|Expression BETWEEN Expression AND Expression
+|EXISTS SelectStatement
+|Expression [NOT] IN SelectStatement|ExpressionList
+|(ExpressionList|OP ExpressionList CP) IS [NOT] NULL
+|Expression [NOT] LIKE Expression [ESCAPE (Literal|HostIdentifier)] [TERMINATE (Literal|HostIdentifier)]
+|Expression ComparisonOperator (ANY|ALL|SOME) SelectStatement
+|SearchCondition)
+private ComparisonPredicate ::= Expression ComparisonOperator Expression
+private ComparisonOperator ::= {EQUAL|NOT_EQUAL|LESS_THAN|GREATER_THAN|LASS_THAN_OR_EQUAL_TO|GREATER_THAN_OR_EQUAL_TO}
+
+//TODO : support correclation names (.) and host structures (OF/IN)
+Expression ::= (Identifier|HostIdentifier|Literal)
+Column ::= WORD
+Identifier ::= WORD
+Literal ::= STRING_LITERAL|NUMBER
+TableName ::= WORD|DEFINE|GUARDIAN_FILENAME
+TargetHostIdentifier ::= HOST_WORD
+HostIdentifier ::= HOST_VAR
+
+

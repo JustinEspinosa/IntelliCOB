@@ -70,9 +70,28 @@ task generateCobolLexer(type: GenerateLexer) {
     purgeOldFiles = true
 }
 
+task generateSqlMpParser(type: GenerateParser) {
+    source = "src/main/grammar/SqlMp.bnf"
+    targetRoot = genRoot
+    pathToParser = '/com/github/justinespinosa/intellicob/parser/SqlMpParser.java'
+    pathToPsiRoot = '/com/github/justinespinosa/intellicob/psi/sqlmp'
+    purgeOldFiles = true
+}
+
+task generateSqlMpLexer(type: GenerateLexer) {
+    dependsOn generateSqlMpParser
+    source = "src/main/grammar/SqlMp.flex"
+    targetDir = "gen/com/github/justinespinosa/intellicob/lexer/"
+    targetClass = "SqlMpLexer"
+    skeleton = "src/main/grammar/idea-flex.skeleton"
+    purgeOldFiles = true
+}
+
+
 
 task generatesLexers {
     dependsOn generateCobolLexer
+    dependsOn generateSqlMpLexer
 }
 
 // doesn't work
