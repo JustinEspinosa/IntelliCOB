@@ -20,11 +20,11 @@ public class CobolStructureViewTreeElement implements StructureViewTreeElement {
 
     public CobolStructureViewTreeElement(PsiElement psiElement) {
         this.psiElement = psiElement;
-        presentation = new CobolItemPresentation(psiElement, ALLOWED_ELEMENTS.getOrDefault(psiElement.getClass(), DEFAULT_DESCRIPTOR));
+        presentation = new CobolItemPresentation(psiElement, ALLOWED_ELEMENTS.getOrDefault(psiElement.getNode().getElementType(), DEFAULT_DESCRIPTOR));
     }
 
     private static boolean includedInStructureView(PsiElement element) {
-        return ALLOWED_ELEMENTS.keySet().contains(element.getClass());
+        return ALLOWED_ELEMENTS.keySet().contains(element.getNode().getElementType());
     }
 
     @Override

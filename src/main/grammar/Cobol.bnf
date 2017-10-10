@@ -272,52 +272,52 @@ instruction_ ::= (accept_|add_|alter_|call_|cancel_|checkpoint_|close_|compute_|
 
 //*******************************
 //VERBS of the procedure division
-accept_ ::= ACCEPT identifier_ [FROM (COBOLWORD|DATE [YYYYMMDD]|DAY [YYYYDDD]|DAY-OF-WEEK|TIME)]
-add_ ::= ADD [CORR|CORRESPONDING] identifier_or_literal_+ [TO (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-ADD]
-alter_ ::= ALTER (paragraph_name_ TO [PROCEED TO] paragraph_name_)+
-call_ ::= CALL cobolword_or_literal_ [(IN|OF) file_name_] [using2_] [on_not_on_] [on_exception_] [END-CALL]
-cancel_ ::= CANCEL identifier_
-checkpoint_ ::= CHECKPOINT ([(FILE|QUEUE)] (file_name_|identifier_) )+
-close_ ::= CLOSE file_name_ [((UNIT|REEL)[FOR REMOVAL]|[WITH](LOCK|NO REWIND))]
-compute_ ::= COMPUTE (identifier_ [ROUNDED])+ EQUAL_SIGN_ expression_arithmetic_ size_error_clause_ [END-COMPUTE]
-continue_ ::= CONTINUE
+accept_ ::= ACCEPT identifier_ [FROM (COBOLWORD|DATE [YYYYMMDD]|DAY [YYYYDDD]|DAY-OF-WEEK|TIME)] {pin=1}
+add_ ::= ADD [CORR|CORRESPONDING] identifier_or_literal_+ [TO (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-ADD]  {pin=1}
+alter_ ::= ALTER (paragraph_name_ TO [PROCEED TO] paragraph_name_)+ {pin=1}
+call_ ::= CALL cobolword_or_literal_ [(IN|OF) file_name_] [using2_] [on_not_on_] [on_exception_] [END-CALL] {pin=1}
+cancel_ ::= CANCEL identifier_ {pin=1}
+checkpoint_ ::= CHECKPOINT ([(FILE|QUEUE)] (file_name_|identifier_) )+ {pin=1}
+close_ ::= CLOSE file_name_ [((UNIT|REEL)[FOR REMOVAL]|[WITH](LOCK|NO REWIND))] {pin=1}
+compute_ ::= COMPUTE (identifier_ [ROUNDED])+ EQUAL_SIGN_ expression_arithmetic_ size_error_clause_ [END-COMPUTE] {pin=1}
+continue_ ::= CONTINUE {pin=1}
 //copy is handeld by the lexer as it should return one token to be understood as comment because it is a preprocessor directive
-delete_ ::= DELETE file_name_ [RECORD] invalid_key_clause_ [END-DELETE]
-display_ ::= DISPLAY identifier_or_literal_+ [UPON COBOLWORD] [[WITH] NO ADVANCING]
-divide_ ::= DIVIDE identifier_or_literal_+ [(INTO|BY) (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+] [REMAINDER identifier_] size_error_clause_ [END-DIVIDE]
-enter_ ::= ENTER identifier_or_literal_ [identifier_or_literal_] [(IN|OF) file_name_] [using3_] [GIVING identifier_]
-enter_cobol_ ::= ENTER COBOL DOT
-evaluate_ ::= EVALUATE subject_list_ ((WHEN (object_list_|OTHER))+ instruction_+)+ [END-EVALUATE]
-exit_ ::= EXIT [(PROGRAM|PARAGRAPH|SECTION|PERFORM [CYCLE])]
-free_ ::= FREE identifier_
-goto_ ::= GO [TO] paragraph_name_+ [DEPENDING ON identifier_]
-if_ ::= IF condition_ [THEN] instruction_+ [ELSE instruction_+] [END-IF]
-initialize_ ::= INITIALIZE identifier_ + [REPLACING ((ALPHABETIC|ALPHANUMERIC|NUMERIC|ALPHANUMERIC-EDITED|NUMERIC-EDITED) [DATA] BY identifier_or_literal_)+]
-inspect_ ::= INSPECT identifier_ [tallying_][replacing_][converting_]
-lockfile_ ::= LOCKFILE file_name_ [TIME LIMIT identifier_or_literal_]
-merge_ ::= MERGE file_name_ key_specifier_+ [collating_sequence_] using_+ output_specifier_
-move_ ::= MOVE [CORR|CORRESPONDING] identifier_or_literal_ TO identifier_or_literal_+
-multiply_ ::= MULTIPLY identifier_or_literal_+ [BY (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-MULTIPLY]
-open_ ::= OPEN (INPUT input_file_spec_|OUTPUT output_file_spec_|I-O io_file_spec_|EXTEND extend_file_spec_)
-perform_ ::= PERFORM (perform_procedure_|perform_instructions_)
-read_ ::= READ file_name_ [(NEXT|RESERVED)] [RECORD] [INTO identifier_] [[WITH] (LOCK|PROMPT identifier_)] [time_limit_] at_end_ [END-READ]
-release_ ::= RELEASE identifier_ [FROM identifier_]
+delete_ ::= DELETE file_name_ [RECORD] invalid_key_clause_ [END-DELETE] {pin=1}
+display_ ::= DISPLAY identifier_or_literal_+ [UPON COBOLWORD] [[WITH] NO ADVANCING] {pin=1}
+divide_ ::= DIVIDE identifier_or_literal_+ [(INTO|BY) (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+] [REMAINDER identifier_] size_error_clause_ [END-DIVIDE]  {pin=1}
+enter_ ::= ENTER identifier_or_literal_ [identifier_or_literal_] [(IN|OF) file_name_] [using3_] [GIVING identifier_] {pin=1}
+enter_cobol_ ::= ENTER COBOL DOT {pin=1}
+evaluate_ ::= EVALUATE subject_list_ ((WHEN (object_list_|OTHER))+ instruction_+)+ [END-EVALUATE] {pin=1}
+exit_ ::= EXIT [(PROGRAM|PARAGRAPH|SECTION|PERFORM [CYCLE])] {pin=1}
+free_ ::= FREE identifier_ {pin=1}
+goto_ ::= GO [TO] paragraph_name_+ [DEPENDING ON identifier_] {pin=1}
+if_ ::= IF condition_ [THEN] instruction_+ [ELSE instruction_+] [END-IF] {pin=1}
+initialize_ ::= INITIALIZE identifier_ + [REPLACING ((ALPHABETIC|ALPHANUMERIC|NUMERIC|ALPHANUMERIC-EDITED|NUMERIC-EDITED) [DATA] BY identifier_or_literal_)+] {pin=1}
+inspect_ ::= INSPECT identifier_ [tallying_][replacing_][converting_] {pin=1}
+lockfile_ ::= LOCKFILE file_name_ [TIME LIMIT identifier_or_literal_] {pin=1}
+merge_ ::= MERGE file_name_ key_specifier_+ [collating_sequence_] using_+ output_specifier_ {pin=1}
+move_ ::= MOVE [CORR|CORRESPONDING] identifier_or_literal_ TO identifier_or_literal_+ {pin=1}
+multiply_ ::= MULTIPLY identifier_or_literal_+ [BY (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-MULTIPLY] {pin=1}
+open_ ::= OPEN (INPUT input_file_spec_|OUTPUT output_file_spec_|I-O io_file_spec_|EXTEND extend_file_spec_) {pin=1}
+perform_ ::= PERFORM (perform_procedure_|perform_instructions_) {pin=1}
+read_ ::= READ file_name_ [(NEXT|RESERVED)] [RECORD] [INTO identifier_] [[WITH] (LOCK|PROMPT identifier_)] [time_limit_] at_end_ [END-READ] {pin=1}
+release_ ::= RELEASE identifier_ [FROM identifier_] {pin=1}
 //replace is like copy
-return_ ::= RETURN file_name_ [INTO identifier_] at_end_ [END-READ]
-rewrite_ ::= REWRITE identifier_ [FROM identifier_] [[WITH] UNLOCK ] invalid_key_clause_ [END-REWRITE]
-search_ ::= SEARCH (identifier_ search_varying_|ALL  identifier_ search_all_) [END-SEARCH]
-set_ ::= SET (identifier_|ADDRESS OF identifier_)+ (UP [BY]|DOWN [BY]|TO) (ON|OFF|TRUE|identifier_or_literal_|ADDRESS OF identifier_|NULL|NULLS)
-sort_ ::= SORT file_name_ key_specifier_+ [[WITH] DUPLICATES [IN] [ORDER]] [collating_sequence_] sort_input_specifier_ sort_output_specifier_
-start_ ::= START file_name_ key_phrase_  [(APPROXIMATE|GENERIC)] [time_limit_] invalid_key_clause_ [END-START]
-startbackup_ ::= STARTBACKUP identifier_or_literal_ identifier_or_literal_
-stop_ ::= STOP (RUN|identifier_or_literal_)
-string_ ::= STRING {identifier_or_literal_+ DELIMITED [BY] (SIZE|identifier_or_literal_)}+ INTO identifier_ [[WITH] POINTER identifier_] overflow_clause_ [END-STRING]
-subtract_ ::= SUBTRACT [CORR|CORRESPONDING] identifier_or_literal_+ [FROM (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-SUBTRACT]
-unlockfile_ ::= UNLOCKFILE file_name_
-unlockrecord_ ::= UNLOCKRECORD file_name_
-unstring_ ::= UNSTRING identifier_ [DELIMITED [BY] [ALL] identifier_or_literal_ ([OR [ALL] identifier_or_literal_])+] INTO unstring_result_+ [[WITH] POINTER identifier_] [TALLYING [IN] identifier_] overflow_clause_ [END-UNSTRING]
-use_ ::= USE [GLOBAL] AFTER [STANDARD] (EXCEPTION|ERROR) PROCEDURE [ON] (file_name_|INPUT|OUTPUT|I-O|EXTEND) DOT
-write_ ::= WRITE identifier_ [FROM identifier_] [advancing_clause_ end_of_page_clause_] invalid_key_clause_ [END-WRITE]
+return_ ::= RETURN file_name_ [INTO identifier_] at_end_ [END-READ] {pin=1}
+rewrite_ ::= REWRITE identifier_ [FROM identifier_] [[WITH] UNLOCK ] invalid_key_clause_ [END-REWRITE] {pin=1}
+search_ ::= SEARCH (identifier_ search_varying_|ALL  identifier_ search_all_) [END-SEARCH] {pin=1}
+set_ ::= SET (identifier_|ADDRESS OF identifier_)+ (UP [BY]|DOWN [BY]|TO) (ON|OFF|TRUE|identifier_or_literal_|ADDRESS OF identifier_|NULL|NULLS) {pin=1}
+sort_ ::= SORT file_name_ key_specifier_+ [[WITH] DUPLICATES [IN] [ORDER]] [collating_sequence_] sort_input_specifier_ sort_output_specifier_ {pin=1}
+start_ ::= START file_name_ key_phrase_  [(APPROXIMATE|GENERIC)] [time_limit_] invalid_key_clause_ [END-START] {pin=1}
+startbackup_ ::= STARTBACKUP identifier_or_literal_ identifier_or_literal_ {pin=1}
+stop_ ::= STOP (RUN|identifier_or_literal_) {pin=1}
+string_ ::= STRING {identifier_or_literal_+ DELIMITED [BY] (SIZE|identifier_or_literal_)}+ INTO identifier_ [[WITH] POINTER identifier_] overflow_clause_ [END-STRING] {pin=1}
+subtract_ ::= SUBTRACT [CORR|CORRESPONDING] identifier_or_literal_+ [FROM (identifier_or_literal_ [ROUNDED])+] [GIVING (identifier_ [ROUNDED])+ ] size_error_clause_ [END-SUBTRACT] {pin=1}
+unlockfile_ ::= UNLOCKFILE file_name_ {pin=1}
+unlockrecord_ ::= UNLOCKRECORD file_name_ {pin=1}
+unstring_ ::= UNSTRING identifier_ [DELIMITED [BY] [ALL] identifier_or_literal_ ([OR [ALL] identifier_or_literal_])+] INTO unstring_result_+ [[WITH] POINTER identifier_] [TALLYING [IN] identifier_] overflow_clause_ [END-UNSTRING] {pin=1}
+use_ ::= USE [GLOBAL] AFTER [STANDARD] (EXCEPTION|ERROR) PROCEDURE [ON] (file_name_|INPUT|OUTPUT|I-O|EXTEND) DOT {pin=1}
+write_ ::= WRITE identifier_ [FROM identifier_] [advancing_clause_ end_of_page_clause_] invalid_key_clause_ [END-WRITE] {pin=1}
 
 //*******************************
 //Rules common to multiple procedure division verbs or sub-rules

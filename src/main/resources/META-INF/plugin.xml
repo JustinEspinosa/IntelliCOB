@@ -22,23 +22,20 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <!--languageInjector implementation="com.github.justinespinosa.intellicob.psi.inject.EmbeddedSqlInjector"/-->
-        <lang.psiAugmentProvider
-                implementation="com.github.justinespinosa.intellicob.psi.augment.CobolAugmentProvider"/>
         <fileTypeFactory implementation="com.github.justinespinosa.intellicob.filetype.CobolFileTypeFactory"/>
-        <lang.parserDefinition language="Cobol"
-                               implementationClass="com.github.justinespinosa.intellicob.parser.CobolParserDefinition"/>
-        <lang.syntaxHighlighterFactory language="Cobol"
-                                       implementationClass="com.github.justinespinosa.intellicob.highlight.CobolSyntaxHighlighterFactory"/>
-        <lang.psiStructureViewFactory language="Cobol"
-                                      implementationClass="com.github.justinespinosa.intellicob.structureview.CobolStructureViewFactory"/>
+        <lang.braceMatcher language="Cobol" implementationClass="com.github.justinespinosa.intellicob.brace.CobolBraceMatcher"/>
+        <lang.parserDefinition language="Cobol" implementationClass="com.github.justinespinosa.intellicob.parser.CobolParserDefinition"/>
+        <lang.braceMatcher language="Cobol" implementationClass="com.github.justinespinosa.intellicob.brace.CobolBraceMatcher"/>
+        <lang.foldingBuilder language="Cobol" implementationClass="com.github.justinespinosa.intellicob.folding.CobolFoldingBuilder"/>
+        <lang.syntaxHighlighterFactory language="Cobol" implementationClass="com.github.justinespinosa.intellicob.highlight.CobolSyntaxHighlighterFactory"/>
+        <lang.psiStructureViewFactory language="Cobol" implementationClass="com.github.justinespinosa.intellicob.structureview.CobolStructureViewFactory"/>
+        <lang.namesValidator language="Cobol" implementationClass="com.github.justinespinosa.intellicob.psi.CobolNamesValidator"/>
 
-        <lang.namesValidator language="Cobol"
-                             implementationClass="com.github.justinespinosa.intellicob.psi.CobolNamesValidator"/>
+        <languageInjector implementation="com.github.justinespinosa.intellicob.psi.inject.CobolCopyInjector"/>
 
 
-        <lang.parserDefinition language="EmbeddedSqlMp"
-                               implementationClass="com.github.justinespinosa.intellicob.parser.SqlMpParserDefinition"/>
+        <!--languageInjector implementation="com.github.justinespinosa.intellicob.psi.inject.EmbeddedSqlInjector"/-->
+        <lang.parserDefinition language="EmbeddedSqlMp" implementationClass="com.github.justinespinosa.intellicob.parser.SqlMpParserDefinition"/>
 
     </extensions>
 

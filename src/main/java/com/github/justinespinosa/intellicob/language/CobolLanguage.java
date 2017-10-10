@@ -8,4 +8,5 @@ public class CobolLanguage extends Language {
     private CobolLanguage() {
         super("Cobol");
     }
+
 }
