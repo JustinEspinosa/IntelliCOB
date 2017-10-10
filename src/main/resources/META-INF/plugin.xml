@@ -31,8 +31,6 @@
         <lang.psiStructureViewFactory language="Cobol" implementationClass="com.github.justinespinosa.intellicob.structureview.CobolStructureViewFactory"/>
         <lang.namesValidator language="Cobol" implementationClass="com.github.justinespinosa.intellicob.psi.CobolNamesValidator"/>
 
-        <languageInjector implementation="com.github.justinespinosa.intellicob.psi.inject.CobolCopyInjector"/>
-
 
         <!--languageInjector implementation="com.github.justinespinosa.intellicob.psi.inject.EmbeddedSqlInjector"/-->
         <lang.parserDefinition language="EmbeddedSqlMp" implementationClass="com.github.justinespinosa.intellicob.parser.SqlMpParserDefinition"/>
