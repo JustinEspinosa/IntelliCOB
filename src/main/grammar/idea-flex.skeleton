@@ -78,6 +78,8 @@
    */
   private int zzFinalHighSurrogate = 0;
 
+  private boolean zzNeedsRefill = false;
+
   /** the stack of open (nested) input streams to read from */
   private java.util.Stack<ZzFlexStreamInfo> zzStreams
     = new java.util.Stack<ZzFlexStreamInfo>();
@@ -95,32 +97,35 @@
     int yyline;
     int yychar;
     int yycolumn;
-    char [] zzBuffer;
+    CharSequence zzBuffer;
     boolean zzAtBOL;
     boolean zzAtEOF;
     boolean zzEOFDone;
     int zzFinalHighSurrogate;
 
-    /** sets all values stored in this class */
+    /**
+     * sets all values stored in this class
+     */
     ZzFlexStreamInfo(java.io.Reader zzReader, int zzEndRead, int zzStartRead,
-                  int zzCurrentPos, int zzMarkedPos, char [] zzBuffer,
-                  boolean zzAtBOL, boolean zzAtEOF, boolean zzEOFDone,
-                  int zzFinalHighSurrogate, int yyline, int yychar, int yycolumn) {
-      this.zzReader      = zzReader;
-      this.zzEndRead     = zzEndRead;
-      this.zzStartRead   = zzStartRead;
-      this.zzCurrentPos  = zzCurrentPos;
-      this.zzMarkedPos   = zzMarkedPos;
-      this.zzBuffer      = zzBuffer;
-      this.zzAtBOL       = zzAtBOL;
-      this.zzAtEOF       = zzAtEOF;
-      this.zzEOFDone     = zzEOFDone;
+                     int zzCurrentPos, int zzMarkedPos, CharSequence zzBuffer,
+                     boolean zzAtBOL, boolean zzAtEOF, boolean zzEOFDone,
+                     int zzFinalHighSurrogate, int yyline, int yychar, int yycolumn) {
+      this.zzReader = zzReader;
+      this.zzEndRead = zzEndRead;
+      this.zzStartRead = zzStartRead;
+      this.zzCurrentPos = zzCurrentPos;
+      this.zzMarkedPos = zzMarkedPos;
+      this.zzBuffer = zzBuffer;
+      this.zzAtBOL = zzAtBOL;
+      this.zzAtEOF = zzAtEOF;
+      this.zzEOFDone = zzEOFDone;
       this.zzFinalHighSurrogate = zzFinalHighSurrogate;
-      this.yyline        = yyline;
-      this.yychar        = yychar;
-      this.yycolumn      = yycolumn;
+      this.yyline = yyline;
+      this.yychar = yychar;
+      this.yycolumn = yycolumn;
     }
   }
+
 
 --- user class code
 
@@ -151,56 +156,10 @@
    * @exception   java.io.IOException  if any I/O-Error occurs
    */
   private boolean zzRefill() throws java.io.IOException {
-
-    /* first: make room (if you can) */
-    if (zzStartRead > 0) {
-      zzEndRead += zzFinalHighSurrogate;
-      zzFinalHighSurrogate = 0;
-      System.arraycopy(zzBuffer, zzStartRead,
-                       zzBuffer, 0,
-                       zzEndRead-zzStartRead);
-
-      /* translate stored positions */
-      zzEndRead-= zzStartRead;
-      zzCurrentPos-= zzStartRead;
-      zzMarkedPos-= zzStartRead;
-      zzStartRead = 0;
-    }
-
-    /* is the buffer big enough? */
-    if (zzCurrentPos >= zzBuffer.length - zzFinalHighSurrogate) {
-      /* if not: blow it up */
-      char newBuffer[] = new char[zzBuffer.length * 2];
-      System.arraycopy(zzBuffer, 0, newBuffer, 0, zzBuffer.length);
-      zzBuffer = newBuffer;
-      zzEndRead += zzFinalHighSurrogate;
-      zzFinalHighSurrogate = 0;
-    }
-
-    /* fill the buffer with new input */
-    int requested = zzBuffer.length - zzEndRead;
-    int numRead = zzReader.read(zzBuffer, zzEndRead, requested);
-
-    /* not supposed to occur according to specification of java.io.Reader */
-    if (numRead == 0) {
-      throw new java.io.IOException("Reader returned 0 characters. See JFlex examples for workaround.");
-    }
-    if (numRead > 0) {
-      zzEndRead += numRead;
-      /* If numRead == requested, we might have requested to few chars to
-         encode a full Unicode character. We assume that a Reader would
-         otherwise never return half characters. */
-      if (numRead == requested) {
-        if (Character.isHighSurrogate(zzBuffer[zzEndRead - 1])) {
-          --zzEndRead;
-          zzFinalHighSurrogate = 1;
-        }
-      }
-      /* potentially more input available */
+    if(zzNeedsRefill){
+      zzNeedsRefill = false;
       return false;
     }
-
-    /* numRead < 0 ==> end of stream */
     return true;
   }
 
@@ -223,13 +182,13 @@
    * char, and column counting remain untouched.
    *
    * The current input stream can be restored with
-   * yypopStream (usually in an <<EOF>> action).
+   * popStream (usually in an <<EOF>> action).
    *
    * @param reader the new input stream to read from
    *
-   * @see #yypopStream()
+   * @see #popStream()
    */
-  public final void yypushStream(java.io.Reader reader) {
+  public final void pushStream(CharSequence buffer, int start, int end) {
     zzStreams.push(
       new ZzFlexStreamInfo(zzReader, zzEndRead, zzStartRead, zzCurrentPos,
                         zzMarkedPos, zzBuffer, zzAtBOL, zzAtEOF, zzEOFDone,
@@ -237,10 +196,10 @@
     );
     zzAtBOL  = true;
     zzAtEOF  = false;
-    zzBuffer = new char[ZZ_BUFFERSIZE];
-    zzReader = reader;
-    zzEndRead = zzStartRead = 0;
-    zzCurrentPos = zzMarkedPos = 0;
+    zzBuffer = buffer;
+    zzReader = null;
+    zzEndRead = end;
+    zzCurrentPos = zzMarkedPos = zzStartRead = start;
     zzFinalHighSurrogate = 0;
     yyline = yychar = yycolumn = 0;
   }
@@ -256,10 +215,9 @@
    * @throws java.io.IOException
    *         if there was an error in closing the stream.
    *
-   * @see #yypushStream(java.io.Reader)
+   * @see #pushStream(java.io.Reader)
    */
-  public final void yypopStream() throws java.io.IOException {
-    zzReader.close();
+  public final void popStream()  {
     ZzFlexStreamInfo s = (ZzFlexStreamInfo) zzStreams.pop();
     zzBuffer      = s.zzBuffer;
     zzReader      = s.zzReader;
@@ -287,40 +245,27 @@
 
 
   /**
-   * Resets the scanner to read from a new input stream.
-   * Does not close the old reader.
-   *
-   * All internal variables are reset, the old input stream
-   * <b>cannot</b> be reused (internal buffer is discarded and lost).
-   * Lexical state is set to <tt>ZZ_INITIAL</tt>.
-   *
-   * Internal scan buffer is resized down to its initial length, if it has grown.
-   *
-   * @param reader   the new input stream
-   *
-   * @see #yypushStream(java.io.Reader)
-   * @see #yypopStream()
-   */
-  public final void yyreset(java.io.Reader reader) {
-    zzReader = reader;
-    zzAtBOL  = true;
-    zzAtEOF  = false;
-    zzEOFDone = false;
-    zzEndRead = zzStartRead = 0;
-    zzCurrentPos = zzMarkedPos = 0;
-    zzFinalHighSurrogate = 0;
-    yyline = yychar = yycolumn = 0;
-    zzLexicalState = YYINITIAL;
-    if (zzBuffer.length > ZZ_BUFFERSIZE)
-      zzBuffer = new char[ZZ_BUFFERSIZE];
-  }
-
-
-  /**
    * Returns the current lexical state.
    */
   public final int yystate() {
     return zzLexicalState;
+  }
+
+
+  private ZzFlexStreamInfo getBaseStream(){
+    if(yymoreStreams()){
+      return zzStreams.get(0);
+    }else{
+      return null;
+    }
+  }
+
+  public int getBaseTokenEnd(){
+    ZzFlexStreamInfo baseStream = getBaseStream();
+    if(baseStream == null){
+      return getTokenEnd();
+    }
+    return baseStream.zzStartRead + (baseStream.zzMarkedPos-baseStream.zzStartRead);
   }
 
 
@@ -455,9 +400,16 @@
       zzMarkedPos = zzMarkedPosL;
 --- char count update
 
-      if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
-        zzAtEOF = true;
+      if (zzInput == YYEOF && zzStartRead == zzCurrentPos ) {
+
+      if(yymoreStreams()){
+         popStream();
+         zzNeedsRefill = true;
+      }else{
+         zzAtEOF = true;
 --- eofvalue
+      }
+
       }
       else {
 --- actions

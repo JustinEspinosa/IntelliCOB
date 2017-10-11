@@ -1,8 +1,14 @@
 package com.github.justinespinosa.intellicob.parser;
 
+import com.github.justinespinosa.intellicob.lexer.MultiStreamFlexAdapter;
+import com.github.justinespinosa.intellicob.lexer.MultiStreamFlexLexer;
 import com.intellij.lang.PsiBuilder;
+import com.intellij.lang.PsiParser;
 import com.intellij.lang.parser.GeneratedParserUtilBase;
 import com.intellij.openapi.util.Key;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.TokenSet;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
 import java.util.regex.Pattern;
@@ -14,6 +20,12 @@ public class CobolParserUtil extends GeneratedParserUtilBase {
 
     private static final Pattern VARIABLE_LEVEL = Pattern.compile("[0-4][0-9]");
     private static final Key<Stack<Integer>> PREVIOUS_VARIABLE_LEVEL = new Key<>("com.github.justinespinosa.intellicob.PREVIOUS_VARIABLE_LEVEL");
+
+    public static PsiBuilder adapt_builder_(IElementType root, PsiBuilder builder, PsiParser parser, TokenSet[] extendsSets) {
+        ErrorState state = new ErrorState();
+        ErrorState.initState(state, builder, root, extendsSets);
+        return new MultiStreamBuilder(builder, state, parser);
+    }
 
     private static boolean isValidChildVariableLevel(String text) {
         if (text.length() != 2) {
@@ -85,6 +97,26 @@ public class CobolParserUtil extends GeneratedParserUtilBase {
             }
         }
         return false;
+    }
+
+    public static class MultiStreamBuilder extends Builder {
+
+        public MultiStreamBuilder(PsiBuilder builder, ErrorState state_, PsiParser parser_) {
+            super(builder, state_, parser_);
+        }
+
+        public MultiStreamFlexLexer getFlex() {
+            return ((MultiStreamFlexAdapter) getLexer()).getFlex();
+        }
+
+        @Nullable
+        @Override
+        public String getTokenText() {
+            if (getFlex().yymoreStreams()) {
+                return getFlex().yytext().toString();
+            }
+            return super.getTokenText();
+        }
     }
 
 

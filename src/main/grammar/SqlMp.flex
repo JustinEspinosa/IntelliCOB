@@ -11,7 +11,7 @@ import static com.intellij.psi.TokenType.*;
 %%
 
 %class SqlMpLexer
-%implements FlexLexer
+%implements MultiStreamFlexLexer
 %unicode
 %caseless
 %function advance
@@ -21,7 +21,7 @@ import static com.intellij.psi.TokenType.*;
 
 //general
 
-WHITE_SPACE=[\ \n\t\f,]
+WHITE_SPACE=[\ \n\t\f]
 WORD=[a-zA-Z0-9][a-zA-Z0-9_]*
 HOST_WORD=[a-zA-Z0-9][a-zA-Z0-9-]*
 HOST_VAR=":"{HOST_WORD}

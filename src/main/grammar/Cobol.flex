@@ -10,12 +10,12 @@ import static com.intellij.psi.TokenType.*;
 %%
 
 %class CobolLexer
-%implements FlexLexer
+%implements MultiStreamFlexLexer
 %unicode
 %caseless
 %function advance
 %type IElementType
-%eof{  return;
+%eof{
 %eof}
 
 //general
@@ -30,7 +30,6 @@ COMMENT_INDICATOR="*"
 PREPROCESSOR_INDICATOR="?"
 PAGE_INDICATOR="/"
 COMMENT_ENTRY=.+
-PREPROCESSOR=.+
 COBOLWORD=[a-zA-Z0-9][a-zA-Z0-9-]*
 INTEGER_=[\+\-]?[0-9]+
 NUMBER_=[\+\-]?[0-9]+\.[0-9]+
@@ -82,6 +81,11 @@ DEFINE=\={COBOLWORD}
    private void state(int state){
        previousState = yystate();
        yybegin(state);
+   }
+
+   private void includeFile(){
+      String code = "77 my-var pic x.  ";
+      pushStream(code, 0, code.length() );
    }
 
 %}
@@ -209,7 +213,7 @@ DEFINE=\={COBOLWORD}
 {
   \"             { state(STRING_STATE); }
   {DOUBLE_EQUAL} { state(PSEUDOTEXT_STATE);  }
-  {DOT}          { normalCode(); return COPY_PREPROCESSOR;}
+  {DOT}          { includeFile(); normalCode(); return COPY_PREPROCESSOR;}
   {CRLF}         { state(YYINITIAL); }
   .              { }
 }
