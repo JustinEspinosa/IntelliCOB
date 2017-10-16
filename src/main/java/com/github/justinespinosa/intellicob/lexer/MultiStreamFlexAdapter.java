@@ -1,5 +1,6 @@
 package com.github.justinespinosa.intellicob.lexer;
 
+import com.intellij.lang.ForeignLeafType;
 import com.intellij.lexer.LexerBase;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -49,9 +50,9 @@ public class MultiStreamFlexAdapter extends LexerBase {
      'lexer not progressing'
      */
     private int doGetState() {
-        if (partialParsing && previousState == state && previousTokenStart == tokenStart && tokenType == previousTokenType) {
+      /*  if (partialParsing && previousState == state && previousTokenStart == tokenStart && tokenType == previousTokenType) {
             return state + 8192;
-        }
+        }*/
         return state;
     }
 
@@ -110,7 +111,14 @@ public class MultiStreamFlexAdapter extends LexerBase {
             previousState = state;
             state = flexLexer.yystate();
             previousTokenType = tokenType;
+
+            boolean isForeignBefore = flexLexer.yymoreStreams();
             tokenType = flexLexer.advance();
+            boolean isForeignAfter = flexLexer.yymoreStreams();
+            if (isForeignBefore && isForeignAfter) {
+                tokenType = wrapTokenType(tokenType);
+            }
+            //getBaseTokenEnd
             tokenEnd = flexLexer.getBaseTokenEnd();
         } catch (ProcessCanceledException e) {
             throw e;
@@ -120,6 +128,10 @@ public class MultiStreamFlexAdapter extends LexerBase {
             tokenEnd = bufferEnd;
             LOGGER.warn(flexLexer.getClass().getName(), e);
         }
+    }
+
+    private IElementType wrapTokenType(IElementType tokenType) {
+        return new ForeignLeafType(tokenType, flexLexer.yytext());
     }
 
     @Override
