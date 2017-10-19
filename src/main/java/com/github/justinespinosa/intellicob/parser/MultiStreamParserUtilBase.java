@@ -4,11 +4,13 @@ import com.github.justinespinosa.intellicob.lexer.MultiStreamFlexAdapter;
 import com.github.justinespinosa.intellicob.lexer.MultiStreamFlexLexer;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiParser;
-import com.intellij.lang.TokenWrapper;
 import com.intellij.lang.parser.GeneratedParserUtilBase;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.Nullable;
+
+import static com.github.justinespinosa.intellicob.psi.PsiUtil.getElementType;
+import static com.github.justinespinosa.intellicob.psi.PsiUtil.isSkipped;
 
 public class MultiStreamParserUtilBase extends GeneratedParserUtilBase {
 
@@ -31,13 +33,28 @@ public class MultiStreamParserUtilBase extends GeneratedParserUtilBase {
         @Nullable
         @Override
         public IElementType getTokenType() {
-            IElementType type = super.getTokenType();
-            if (type instanceof TokenWrapper) {
-                return ((TokenWrapper) type).getDelegate();
-            }
-            return type;
+            eof();
+            return getElementType(super.getTokenType());
         }
 
+        @Override
+        public boolean eof() {
+            if (super.eof()) {
+                return true;
+            }
+
+            while (isSkipped(super.getTokenType())) {
+                super.advanceLexer();
+            }
+
+            return super.eof();
+        }
+
+        @Override
+        public void advanceLexer() {
+            eof();
+            super.advanceLexer();
+        }
     }
 
 }
