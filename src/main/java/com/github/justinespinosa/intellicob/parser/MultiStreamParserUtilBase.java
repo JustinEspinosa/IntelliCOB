@@ -30,6 +30,14 @@ public class MultiStreamParserUtilBase extends GeneratedParserUtilBase {
             return ((MultiStreamFlexAdapter) getLexer()).getFlex();
         }
 
+
+        @Nullable
+        @Override
+        public String getTokenText() {
+            eof();
+            return super.getTokenText();
+        }
+
         @Nullable
         @Override
         public IElementType getTokenType() {

@@ -23,17 +23,26 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <fileTypeFactory implementation="com.github.justinespinosa.intellicob.filetype.CobolFileTypeFactory"/>
-        <lang.braceMatcher language="Cobol" implementationClass="com.github.justinespinosa.intellicob.brace.CobolBraceMatcher"/>
-        <lang.parserDefinition language="Cobol" implementationClass="com.github.justinespinosa.intellicob.parser.CobolParserDefinition"/>
-        <lang.braceMatcher language="Cobol" implementationClass="com.github.justinespinosa.intellicob.brace.CobolBraceMatcher"/>
-        <lang.foldingBuilder language="Cobol" implementationClass="com.github.justinespinosa.intellicob.folding.CobolFoldingBuilder"/>
-        <lang.syntaxHighlighterFactory language="Cobol" implementationClass="com.github.justinespinosa.intellicob.highlight.CobolSyntaxHighlighterFactory"/>
-        <lang.psiStructureViewFactory language="Cobol" implementationClass="com.github.justinespinosa.intellicob.structureview.CobolStructureViewFactory"/>
-        <lang.namesValidator language="Cobol" implementationClass="com.github.justinespinosa.intellicob.psi.CobolNamesValidator"/>
-
+        <lang.braceMatcher language="Cobol"
+                           implementationClass="com.github.justinespinosa.intellicob.brace.CobolBraceMatcher"/>
+        <lang.parserDefinition language="Cobol"
+                               implementationClass="com.github.justinespinosa.intellicob.parser.CobolParserDefinition"/>
+        <lang.braceMatcher language="Cobol"
+                           implementationClass="com.github.justinespinosa.intellicob.brace.CobolBraceMatcher"/>
+        <lang.foldingBuilder language="Cobol"
+                             implementationClass="com.github.justinespinosa.intellicob.folding.CobolFoldingBuilder"/>
+        <lang.syntaxHighlighterFactory language="Cobol"
+                                       implementationClass="com.github.justinespinosa.intellicob.highlight.CobolSyntaxHighlighterFactory"/>
+        <lang.psiStructureViewFactory language="Cobol"
+                                      implementationClass="com.github.justinespinosa.intellicob.structureview.CobolStructureViewFactory"/>
+        <lang.namesValidator language="Cobol"
+                             implementationClass="com.github.justinespinosa.intellicob.psi.CobolNamesValidator"/>
+        <lang.ast.factory language="Cobol"
+                          implementationClass="com.github.justinespinosa.intellicob.ast.CobolAstFactory"/>
 
         <!--languageInjector implementation="com.github.justinespinosa.intellicob.psi.inject.EmbeddedSqlInjector"/-->
-        <lang.parserDefinition language="EmbeddedSqlMp" implementationClass="com.github.justinespinosa.intellicob.parser.SqlMpParserDefinition"/>
+        <lang.parserDefinition language="EmbeddedSqlMp"
+                               implementationClass="com.github.justinespinosa.intellicob.parser.SqlMpParserDefinition"/>
 
     </extensions>
 

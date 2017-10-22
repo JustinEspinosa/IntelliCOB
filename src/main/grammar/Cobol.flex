@@ -84,7 +84,7 @@ DEFINE=\={COBOLWORD}
    }
 
    private void includeFile(){
-      String code = "77 my-var pic x.  ";
+      String code = " 77 my-var pic x. ";
       pushStream(code, 0, code.length() );
    }
 

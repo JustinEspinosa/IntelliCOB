@@ -1,6 +1,5 @@
 package com.github.justinespinosa.intellicob.lexer;
 
-import com.intellij.lang.ForeignLeafType;
 import com.intellij.lexer.LexerBase;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -131,7 +130,7 @@ public class MultiStreamFlexAdapter extends LexerBase {
     }
 
     private IElementType wrapTokenType(IElementType tokenType) {
-        return new ForeignLeafType(tokenType, flexLexer.yytext());
+        return new ForeignTokenType(tokenType, flexLexer.yytext());
     }
 
     @Override

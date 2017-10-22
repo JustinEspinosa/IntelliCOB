@@ -36,18 +36,22 @@ public class CobolDataItemElement extends ASTWrapperPsiElement implements PsiNam
 
     @Override
     public String getName() {
-        ASTNode keyNode = getNode().findChildByType(CobolTypes.DATA_ITEM_NAME_);
-        if (keyNode == null) {
+        ASTNode nameComposite = getNode().findChildByType(CobolTypes.DATA_ITEM_NAME_);
+        if (nameComposite == null) {
             return "";
         }
-        return keyNode.getText();
+        ASTNode nameToken = nameComposite.findChildByType(CobolTypes.COBOLWORD);
+        if (nameToken == null) {
+            return "";
+        }
+        return nameComposite.getText();
     }
 
     @Override
     public PsiElement setName(String newName) {
-        ASTNode keyNode = getNode().findChildByType(CobolTypes.DATA_ITEM_NAME_);
-        ASTNode newKeyNode = createDataItemName(getProject(), newName);
-        getNode().replaceChild(keyNode, newKeyNode);
+        ASTNode nameComposite = getNode().findChildByType(CobolTypes.DATA_ITEM_NAME_);
+        ASTNode newNameComposite = createDataItemName(getProject(), newName);
+        getNode().replaceChild(nameComposite, newNameComposite);
         return this;
     }
 }
